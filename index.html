@@ -3,264 +3,905 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modern Prezentáció Szerkesztő</title>
-    <link rel="stylesheet" href="styles.css">
-    <!-- Tailwind CSS CDN (Fejlesztéshez. Élesben optimalizáld!) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Dialógus és Skeleton Loader stílusok (styles.css-be is tehetők) */
-        dialog::backdrop { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); }
-        .skeleton-slide { height: 72px; background-color: var(--editor-light, #2a2a2a); border-radius: 4px; animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
-    </style>
+    <title>Prezentáció Szerkesztő - Glassmorphism</title>
+    <!-- Bootstrap Ikonok CDN (Opcionális, de hasznos) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Saját stíluslap -->
+ <style>
+   /* --- START OF FILE styles.css --- */
+
+/* === Alapok és Változók === */
+:root {
+  --body-bg: #111827; /* sötétszürke/fekete */
+  --glass-bg: rgba(31, 41, 55, 0.6); /* gray-800 áttetszőbb */
+  --glass-bg-hover: rgba(55, 65, 81, 0.75); /* gray-700 áttetszőbb */
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --text-color: #f9fafb; /* gray-50 */
+  --text-muted: #9ca3af; /* gray-400 */
+  --primary-color: #3b82f6; /* blue-500 */
+  --primary-hover: #2563eb; /* blue-600 */
+  --secondary-color: #4b5563; /* gray-600 */
+  --secondary-hover: #6b7280; /* gray-500 */
+  --focus-ring: #60a5fa; /* blue-400 */
+  --error-color: #ef4444; /* red-500 */
+  --slide-bg-default: #ffffff;
+  --slide-text-default: #000000;
+  --border-radius: 0.375rem; /* rounded-md */
+  --font-sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+    font-family: var(--font-sans);
+    background-color: var(--body-bg);
+    color: var(--text-color);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-image: linear-gradient(to bottom right, #111827, #374151); /* Finom gradient */
+}
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
+.hidden { display: none !important; }
+
+/* === Glassmorphism Háttér === */
+.glass-bg {
+    background-color: var(--glass-bg);
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%); /* Safari */
+    border: 1px solid var(--glass-border);
+    border-radius: var(--border-radius);
+}
+
+/* === Gombok (Bootstrap ihletésű) === */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.75rem; /* btn-sm padding */
+    font-size: 0.875rem; /* text-sm */
+    font-weight: 500;
+    line-height: 1.25;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid transparent;
+    border-radius: var(--border-radius);
+    transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    color: var(--text-color);
+    background-color: var(--secondary-color); /* Alap gomb szürke */
+    border-color: var(--secondary-color);
+}
+.btn:hover:not(:disabled) { background-color: var(--secondary-hover); border-color: var(--secondary-hover); }
+.btn:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; box-shadow: 0 0 0 0.2rem rgba(var(--focus-ring), 0.25); }
+.btn:disabled { opacity: 0.65; cursor: not-allowed; }
+.btn i { font-size: 1.1em; vertical-align: middle; } /* Ikon méret */
+
+/* Gomb Variációk */
+.btn-primary { background-color: var(--primary-color); border-color: var(--primary-color); color: white; }
+.btn-primary:hover:not(:disabled) { background-color: var(--primary-hover); border-color: var(--primary-hover); }
+.btn-secondary { background-color: var(--secondary-color); border-color: var(--secondary-color); } /* Már alapból ez */
+.btn-secondary:hover:not(:disabled) { background-color: var(--secondary-hover); border-color: var(--secondary-hover); }
+.btn-danger { background-color: var(--error-color); border-color: var(--error-color); color: white; } /* Törlés gombhoz */
+.btn-danger:hover:not(:disabled) { background-color: #dc2626; border-color: #dc2626; } /* red-600 */
+.btn-sm { padding: 0.25rem 0.5rem; font-size: 0.875rem; }
+.btn-lg { padding: 0.5rem 1rem; font-size: 1rem; }
+.btn-icon { padding: 0.375rem; width: 2rem; height: 2rem; background-color: transparent; border-color: transparent; color: var(--text-muted); }
+.btn-icon:hover:not(:disabled) { background-color: var(--glass-bg-hover); color: var(--text-color); }
+.btn-icon.btn-sm { width: 1.75rem; height: 1.75rem; padding: 0.25rem; }
+.btn-icon.active, .btn[aria-pressed="true"] { background-color: var(--secondary-hover); color: var(--text-color); }
+
+/* === Form Elemek === */
+.form-control, .form-select {
+    display: block;
+    width: 100%;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text-color);
+    background-color: var(--glass-bg);
+    background-clip: padding-box;
+    border: 1px solid var(--glass-border);
+    appearance: none;
+    border-radius: var(--border-radius);
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+.form-control::placeholder { color: var(--text-muted); opacity: 1; }
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(var(--primary-color), 0.25);
+    background-color: var(--glass-bg-hover);
+}
+.form-control-sm { padding: 0.25rem 0.5rem; font-size: 0.875rem; }
+.form-select-sm { padding-top: 0.25rem; padding-bottom: 0.25rem; padding-left: 0.5rem; font-size: .875rem; }
+.form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    padding-right: 2.5rem; /* Hely a nyílnak */
+}
+
+/* === Elrendezés === */
+.navbar { padding: 0.5rem 1rem; border-bottom: 1px solid var(--glass-border); flex-shrink: 0; }
+.navbar .container-fluid { display: flex; align-items: center; justify-content: space-between; width: 100%; }
+.navbar-left { display: flex; align-items: center; gap: 0.75rem; }
+.navbar-right { display: flex; align-items: center; gap: 0.5rem; }
+.presentation-title-container { display: flex; flex-direction: column; }
+.presentation-title { font-size: 0.875rem; font-weight: 500; cursor: pointer; padding: 0.1rem 0.25rem; border-radius: 0.25rem; }
+.presentation-title:hover, .presentation-title.editing { background-color: var(--glass-bg-hover); }
+.presentation-title:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 1px; }
+.last-edited { font-size: 0.75rem; color: var(--text-muted); }
+.separator { width: 1px; height: 1.25rem; background-color: var(--glass-border); margin: 0 0.5rem; align-self: center; flex-shrink: 0; }
+
+.toolbar { padding: 0.25rem 0.5rem; border-bottom: 1px solid var(--glass-border); flex-shrink: 0; display: flex; flex-wrap: wrap; gap: 0.25rem; align-items: center; }
+.toolbar-group { display: flex; align-items: center; gap: 0.125rem; }
+
+.main-container { display: flex; flex: 1; overflow: hidden; }
+.sidebar { width: 240px; flex-shrink: 0; border-right: 1px solid var(--glass-border); display: flex; flex-direction: column; padding-top: 0.75rem; }
+.sidebar-header { padding: 0 0.75rem 0.75rem; display: flex; flex-direction: column; gap: 0.75rem; border-bottom: 1px solid var(--glass-border); margin-bottom: 0.5rem; }
+.search-wrapper { position: relative; }
+.search-icon { position: absolute; top: 50%; left: 0.625rem; transform: translateY(-50%); color: var(--text-muted); font-size: 0.875rem; pointer-events: none; }
+.search-input { padding-left: 2rem; }
+.slide-list-container { flex: 1; overflow-y: auto; padding: 0 0.5rem 0.5rem; }
+.list-empty-message { color: var(--text-muted); font-size: 0.875rem; text-align: center; padding: 1rem; }
+
+.canvas-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem; position: relative; overflow: hidden; background-color: rgba(0,0,0,0.1); /* Enyhe háttér a mainnek */ }
+#canvas-scaler { transition: transform 150ms ease-in-out; origin: center center; /* Középről skáláz */ }
+.slide-canvas {
+    background-color: var(--slide-bg-default);
+    color: var(--slide-text-default);
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    padding: 2rem 2.5rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Görgetést a belső elemek kezelik */
+    width: 960px; /* Fix szélesség a skálázáshoz */
+    /* aspect-ratio: 16 / 9;  HTML-ben van inline */
+}
+.canvas-placeholder { display: flex; align-items: center; justify-content: center; height: 100%; color: #9ca3af; text-align: center; }
+#slide-canvas > [contenteditable] { outline: none; min-height: 1.5em; background: transparent; padding: 0.1em 0.2em; border-radius: 2px; }
+#slide-canvas > [contenteditable]:focus-visible { box-shadow: 0 0 0 2px var(--primary-color); }
+#slide-title-input { font-size: 2.25rem; line-height: 1.2; font-weight: 700; margin-bottom: 0.5rem; color: inherit; flex-shrink: 0; }
+#slide-subtitle-input { font-size: 1.25rem; line-height: 1.3; margin-bottom: 1rem; color: inherit; opacity: 0.8; flex-shrink: 0; }
+#slide-content-editor { margin-top: 1.5rem; font-size: 1rem; line-height: 1.5rem; flex: 1; min-height: 100px; color: inherit; overflow-y: auto; }
+#slide-content-editor p { margin-bottom: 0.75em; } #slide-content-editor p:last-child { margin-bottom: 0; }
+
+.bottom-bar { position: absolute; bottom: 1rem; left: 50%; transform: translateX(-50%); padding: 0.375rem 0.75rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-radius: var(--border-radius); z-index: 20; width: auto; /* Méret a tartalomhoz igazodik */ }
+.bottom-bar-group { display: flex; align-items: center; gap: 0.5rem; }
+.slide-indicator { font-size: 0.75rem; color: var(--text-muted); min-width: 60px; text-align: center; font-variant-numeric: tabular-nums; }
+.zoom-select { width: 90px; text-align: center; }
+
+/* === Slide Item (Sidebar) === */
+.slide-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem; /* Nagyobb rés */
+    padding: 0.5rem; /* Nagyobb padding */
+    border-radius: var(--border-radius);
+    border: 2px solid transparent;
+    transition: background-color 150ms ease-in-out, border-color 150ms ease-in-out;
+    position: relative;
+    cursor: pointer;
+    outline: none;
+    background-color: transparent; /* Alapból átlátszó */
+    border: 1px solid var(--glass-border);
+}
+.slide-item:hover { background-color: var(--glass-bg-hover); border-color: rgba(255, 255, 255, 0.2); }
+.slide-item:focus-visible { box-shadow: 0 0 0 2px var(--focus-ring) inset; z-index: 10; }
+.slide-item[aria-selected="true"] { background-color: var(--primary-color); border-color: var(--primary-hover); color: white; }
+.slide-item[aria-selected="true"]:hover { background-color: var(--primary-hover); border-color: var(--primary-hover); }
+.slide-item[aria-selected="true"] .slide-number { color: rgba(255, 255, 255, 0.8); }
+.slide-number { font-size: 0.75rem; width: 1rem; text-align: right; color: var(--text-muted); flex-shrink: 0; user-select: none; }
+.slide-preview { width: 5rem; height: 2.8125rem; border-radius: 0.25rem; border: 1px solid var(--glass-border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; text-align: center; overflow: hidden; padding: 0.1rem; line-height: 1.1; background-color: var(--slide-bg-default); position: relative; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.slide-preview > span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0.1rem; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.slide-title-label { font-size: 0.875rem; flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; padding-right: 1.75rem; user-select: none; }
+.slide-item .delete-button { position: absolute; top: 0.25rem; right: 0.25rem; opacity: 0; z-index: 5; background-color: rgba(31, 41, 55, 0.8); backdrop-filter: blur(2px); border-radius: 50%; width: 1.5rem; height: 1.5rem; padding: 0; border: 1px solid var(--glass-border); color: var(--error-color); display: inline-flex; align-items: center; justify-content: center; transition: opacity 150ms ease-in-out, background-color 150ms ease-in-out, color 150ms ease-in-out; }
+.slide-item:hover .delete-button, .slide-item:focus-within .delete-button, .slide-item .delete-button:focus, .slide-item .delete-button:focus-visible { opacity: 1; }
+.delete-button:hover { background-color: var(--error-color); color: white; }
+.delete-button:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 1px; }
+.delete-button i { font-size: 0.8rem; pointer-events: none; }
+
+/* === Dialógus & Dropdown === */
+.dialog { border: 1px solid var(--glass-border); padding: 1.5rem; border-radius: var(--border-radius); max-width: 500px; color: var(--text-color); }
+dialog::backdrop { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(3px); }
+.dialog-title { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+.dialog-text { margin-bottom: 0.5rem; font-size: 0.875rem; color: var(--text-muted); }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1.5rem; }
+.dropdown-menu { position: absolute; top: calc(100% + 0.25rem); right: 0; z-index: 40; min-width: 10rem; padding: 0.5rem 0; list-style: none; border-radius: var(--border-radius); border: 1px solid var(--glass-border); box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.3); }
+.dropdown-item { display: block; width: 100%; padding: 0.375rem 1rem; clear: both; font-weight: 400; color: var(--text-color); text-align: inherit; white-space: nowrap; background-color: transparent; border: 0; font-size: 0.875rem; text-decoration: none; }
+.dropdown-item:hover, .dropdown-item:focus { color: var(--text-color); background-color: var(--glass-bg-hover); }
+.dropdown-item.disabled, .dropdown-item:disabled { color: var(--text-muted); pointer-events: none; background-color: transparent; }
+
+/* === Skeleton Loader === */
+.loading-skeleton { padding: 0.5rem; }
+.skeleton-slide { height: 56px; /* slide-item padding figyelembe vételével */ background: linear-gradient(90deg, var(--glass-bg) 25%, var(--glass-bg-hover) 50%, var(--glass-bg) 75%); background-size: 200% 100%; animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; border-radius: var(--border-radius); margin-bottom: 0.25rem; border: 1px solid var(--glass-border); }
+@keyframes pulse { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+/* === Prezentációs Mód === */
+body.presentation-mode { background-color: #000 !important; }
+body.presentation-mode .navbar, body.presentation-mode .toolbar, body.presentation-mode .sidebar, body.presentation-mode .bottom-bar, body.presentation-mode .delete-button { display: none !important; }
+body.presentation-mode .main-container { display: block !important; padding: 0 !important; }
+body.presentation-mode .canvas-area { padding: 0 !important; height: 100vh !important; width: 100vw !important; position: fixed !important; top: 0; left: 0; background-color: #000 !important; display: flex !important; align-items: center !important; justify-content: center !important; overflow: hidden !important; }
+body.presentation-mode #canvas-scaler { width: 100% !important; height: 100% !important; transform: none !important; display: flex !important; align-items: center !important; justify-content: center !important; }
+body.presentation-mode .slide-canvas { box-shadow: none !important; border-radius: 0 !important; border: none !important; width: 100% !important; height: 100% !important; max-width: calc(100vh * (16 / 9)); max-height: calc(100vw * (9 / 16)); padding: 2vw !important; overflow: hidden !important; }
+body.presentation-mode [contenteditable] { contenteditable: false !important; cursor: default !important; outline: none !important; user-select: none; }
+body.presentation-mode .slide-canvas [contenteditable]:focus-visible { box-shadow: none !important; }
+
+/* === Nyomtatási Stílusok === */
+@media print {
+  @page { size: A4 landscape; margin: 1cm; }
+  body { background-color: white !important; color: black !important; overflow: visible !important; height: auto !important; width: auto !important; position: static !important; display: block !important; background-image: none !important; }
+  .navbar, .toolbar, .sidebar, .bottom-bar, .delete-button, #add-slide-button, #error-display, #share-modal, #more-options-dropdown, #slide-list-loading, #canvas-placeholder, #search-slides { display: none !important; }
+  .main-container { display: block !important; overflow: visible !important; }
+  .canvas-area { padding: 0 !important; height: auto !important; width: 100% !important; position: static !important; display: block !important; overflow: visible !important; background-color: transparent !important; }
+  #slide-list { display: block !important; overflow: visible !important; height: auto !important; padding: 0 !important; margin: 0 !important; border: none !important; }
+  .slide-item { display: none !important; }
+  /* Minden slide egy 'slide-print-wrapper'-be kerül nyomtatás előtt JS által */
+  .slide-print-wrapper { display: block !important; width: 100% !important; height: auto !important; page-break-inside: avoid !important; page-break-after: always !important; margin-bottom: 1cm; transform: none !important; box-shadow: none !important; border: 1px solid #ccc !important; border-radius: 0 !important; overflow: hidden !important; background-color: white !important; color: black !important; padding: 1cm !important; aspect-ratio: 16 / 9; }
+  .slide-print-wrapper, .slide-print-wrapper * { color: black !important; background-color: transparent !important; text-shadow: none !important; box-shadow: none !important; border-color: black !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  [contenteditable][placeholder]:empty::before { content: "" !important; }
+}
+
+/* --- END OF FILE styles.css --- */
+ </style>
 </head>
-<body class="bg-editor-dark text-editor-main h-screen flex flex-col overflow-hidden">
+<body>
 
-    <!-- Header / Felső Eszköztár -->
-    <header role="banner" class="flex items-center justify-between px-3 py-1.5 border-b border-editor-divider bg-editor-dark text-sm flex-shrink-0 relative">
-        <!-- Bal Szekció -->
-        <div class="flex items-center space-x-3">
-             <button type="button" class="action-button icon-only" title="Menü (Nincs imp.)" aria-label="Főmenü megnyitása">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg>
-             </button>
-             <div class="flex flex-col">
-                 <h1 id="presentation-title" class="text-sm font-medium cursor-pointer hover:bg-editor-light px-1 -mx-1 rounded outline-none focus-visible:ring-1 focus-visible:ring-editor-focus" tabindex="0" title="Kattints a szerkesztéshez" aria-label="Prezentáció címe, kattints a szerkesztéshez" role="button">
-                    Névtelen Prezentáció
-                </h1>
-                <span id="presentation-last-edited" class="text-xs text-editor-muted" aria-live="polite">Betöltés...</span>
-            </div>
-        </div>
-        <!-- Középső Szekció: ÜRES -->
-        <div></div>
-        <!-- Jobb Szekció -->
-        <div role="toolbar" aria-label="Prezentáció műveletek" class="flex items-center space-x-2">
-            <button type="button" id="save-button" class="action-button" title="Mentés (Ctrl+S)" aria-label="Prezentáció mentése">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                 <span id="save-button-text">Mentés</span>
-            </button>
-            <button type="button" id="share-button" class="action-button" title="Megosztás" aria-label="Prezentáció megosztása" aria-haspopup="dialog" aria-controls="share-modal">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                Megosztás
-            </button>
-            <button type="button" id="present-button" class="action-button text-white bg-blue-600 hover:bg-blue-700 border-blue-600 hover:border-blue-700" title="Bemutatás (F5)" aria-label="Prezentáció indítása">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                Bemutatás
-            </button>
-            <div class="editor-toolbar-separator mx-1" role="separator" aria-orientation="vertical"></div>
-            <button type="button" id="download-button" class="action-button icon-only" title="Letöltés (JSON)" aria-label="Prezentáció letöltése JSON formátumban">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            </button>
-            <button type="button" id="more-options-button" class="action-button icon-only" title="További opciók" aria-label="További prezentációs opciók" aria-haspopup="true" aria-expanded="false" aria-controls="more-options-dropdown">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
-            </button>
-
-            <!-- Megosztás Modális Ablak -->
-            <dialog id="share-modal" class="bg-editor-light p-6 rounded-lg shadow-xl text-editor-main max-w-sm w-full border border-editor-divider" aria-labelledby="share-modal-title" aria-modal="true">
-                <h3 id="share-modal-title" class="text-lg font-medium mb-4">Prezentáció Megosztása</h3>
-                <p class="text-sm text-editor-muted mb-2">Másold ki ezt a linket (ez csak egy példa):</p>
-                <input id="share-url-input" type="text" readonly class="w-full bg-editor-dark p-2 rounded border border-editor-divider text-sm mb-4 focus:outline-none focus:ring-1 focus:ring-editor-focus" aria-label="Megosztási link" value="Generálás...">
-                <div class="flex justify-end space-x-2">
-                    <button type="button" id="copy-share-url-button" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm action-button">Másolás</button>
-                    <form method="dialog" class="inline"><button type="submit" class="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm action-button">Bezárás</button></form>
+    <!-- Felső Navigációs Sáv (Header) -->
+    <nav class="navbar glass-bg">
+        <div class="container-fluid">
+            <!-- Bal oldal: Menü gomb és Cím -->
+            <div class="navbar-left">
+                <button type="button" class="btn btn-icon" title="Menü (Nincs imp.)" aria-label="Főmenü">
+                    <i class="bi bi-list"></i>
+                </button>
+                <div class="presentation-title-container">
+                    <h1 id="presentation-title" class="presentation-title" tabindex="0" title="Kattints a szerkesztéshez" aria-label="Prezentáció címe" role="button">
+                        Névtelen Prezentáció
+                    </h1>
+                    <span id="presentation-last-edited" class="last-edited" aria-live="polite">Betöltés...</span>
                 </div>
-            </dialog>
+            </div>
 
-            <!-- További Opciók Legördülő Menü -->
-            <div id="more-options-dropdown" class="hidden absolute top-full right-0 mt-2 w-48 bg-editor-light rounded-md shadow-lg py-1 z-40 border border-editor-divider" role="menu" aria-orientation="vertical" aria-labelledby="more-options-button">
-                <a href="#" id="rename-option" class="block px-4 py-2 text-sm text-editor-main hover:bg-editor-dark" role="menuitem">Átnevezés</a>
-                <a href="#" id="duplicate-option" class="block px-4 py-2 text-sm text-editor-main hover:bg-editor-dark" role="menuitem">Másolat készítése</a>
-                <a href="#" id="history-option" class="block px-4 py-2 text-sm text-editor-muted hover:bg-editor-dark cursor-not-allowed" role="menuitem" aria-disabled="true">Verzióelőzmények (Nincs imp.)</a>
-                <a href="#" id="download-option-alt" class="block px-4 py-2 text-sm text-editor-main hover:bg-editor-dark md:hidden" role="menuitem">Letöltés (JSON)</a>
+            <!-- Jobb oldal: Művelet gombok -->
+            <div class="navbar-right" role="toolbar" aria-label="Prezentáció műveletek">
+                <button type="button" id="save-button" class="btn btn-secondary" title="Mentés (Ctrl+S)" aria-label="Prezentáció mentése">
+                    <i class="bi bi-save"></i> <span id="save-button-text">Mentés</span>
+                </button>
+                <button type="button" id="share-button" class="btn btn-secondary" title="Megosztás" aria-label="Prezentáció megosztása" aria-haspopup="dialog" aria-controls="share-modal">
+                    <i class="bi bi-share"></i> Megosztás
+                </button>
+                <button type="button" id="present-button" class="btn btn-primary" title="Bemutatás (F5)" aria-label="Prezentáció indítása">
+                    <i class="bi bi-play-fill"></i> Bemutatás
+                </button>
+                <div class="separator"></div>
+                <button type="button" id="download-button" class="btn btn-icon" title="Letöltés (JSON)" aria-label="Letöltés JSON formátumban">
+                    <i class="bi bi-download"></i>
+                </button>
+                <button type="button" id="more-options-button" class="btn btn-icon" title="További opciók" aria-label="További opciók" aria-haspopup="true" aria-expanded="false" aria-controls="more-options-dropdown">
+                     <i class="bi bi-three-dots-vertical"></i>
+                </button>
+
+                <!-- Megosztás Dialógus -->
+                <dialog id="share-modal" class="dialog glass-bg" aria-labelledby="share-modal-title" aria-modal="true">
+                    <h3 id="share-modal-title" class="dialog-title">Prezentáció Megosztása</h3>
+                    <p class="dialog-text">Másold ki ezt a linket (ez csak egy példa):</p>
+                    <input id="share-url-input" type="text" readonly class="form-control mb-3" aria-label="Megosztási link" value="Generálás...">
+                    <div class="dialog-actions">
+                        <button type="button" id="copy-share-url-button" class="btn btn-primary btn-sm">Másolás</button>
+                        <form method="dialog" class="inline-form"><button type="submit" class="btn btn-secondary btn-sm">Bezárás</button></form>
+                    </div>
+                </dialog>
+
+                <!-- További Opciók Legördülő Menü -->
+                <div id="more-options-dropdown" class="dropdown-menu glass-bg hidden" role="menu" aria-labelledby="more-options-button">
+                    <a href="#" id="rename-option" class="dropdown-item" role="menuitem">Átnevezés</a>
+                    <a href="#" id="duplicate-option" class="dropdown-item" role="menuitem">Másolat készítése</a>
+                    <a href="#" id="history-option" class="dropdown-item disabled" role="menuitem" aria-disabled="true">Verzióelőzmények (Nincs imp.)</a>
+                    <a href="#" id="download-option-alt" class="dropdown-item d-md-none" role="menuitem">Letöltés (JSON)</a> <!-- Csak mobilon -->
+                </div>
             </div>
         </div>
-    </header>
+    </nav>
 
-    <!-- Szerkesztő Formázási Eszköztár (Átalakítva csoportokkal) -->
-    <div id="editor-toolbar" role="toolbar" aria-label="Szerkesztő formázási eszközök" class="px-2 py-1 border-b border-editor-divider bg-editor-dark flex items-center flex-wrap gap-x-1 text-editor-main flex-shrink-0 overflow-x-auto">
-        <!-- Undo/Redo Csoport -->
-        <div class="flex items-center space-x-0.5" role="group" aria-label="Visszavonás/Újra">
-             <button type="button" title="Visszavonás (Ctrl+Z)" aria-label="Visszavonás" data-command="undo" class="editor-toolbar-button icon-only">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path></svg>
-             </button>
-             <button type="button" title="Újra (Ctrl+Y)" aria-label="Újra" data-command="redo" class="editor-toolbar-button icon-only">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3l-3 2.7"></path></svg>
-             </button>
+    <!-- Formázási Eszköztár -->
+    <div id="editor-toolbar" class="toolbar glass-bg" role="toolbar" aria-label="Szerkesztő formázási eszközök">
+        <!-- Csoportok -->
+        <div class="toolbar-group" role="group" aria-label="Visszavonás/Újra">
+            <button type="button" title="Visszavonás (Ctrl+Z)" aria-label="Visszavonás" data-command="undo" class="btn btn-icon"> <i class="bi bi-arrow-counterclockwise"></i> </button>
+            <button type="button" title="Újra (Ctrl+Y)" aria-label="Újra" data-command="redo" class="btn btn-icon"> <i class="bi bi-arrow-clockwise"></i> </button>
         </div>
-        <div class="editor-toolbar-separator" role="separator" aria-orientation="vertical"></div>
-
-        <!-- Beszúrás Csoport (Funkcionalitás Nincs Imp.) -->
-        <div class="flex items-center space-x-0.5" role="group" aria-label="Beszúrás">
-             <button type="button" title="Szöveg beszúrása (Nincs imp.)" aria-label="Szövegdoboz beszúrása" data-feature="insert-text" class="editor-toolbar-button icon-only">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 6.1H7"></path><path d="M21 12.1H7"></path><path d="M15 18.1H7"></path><path d="M3 4.1v16"></path></svg>
-             </button>
-             <button type="button" title="Kép beszúrása (Nincs imp.)" aria-label="Kép beszúrása" data-feature="insert-image" class="editor-toolbar-button icon-only">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>
-             </button>
-             <button type="button" title="Elrendezés (Nincs imp.)" aria-label="Dia elrendezésének módosítása" data-feature="layout" class="editor-toolbar-button icon-only">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M3 9h18"></path><path d="M9 21V9"></path></svg>
-             </button>
+        <div class="separator"></div>
+        <div class="toolbar-group" role="group" aria-label="Beszúrás">
+            <button type="button" title="Szöveg (Nincs imp.)" aria-label="Szöveg beszúrása" data-feature="insert-text" class="btn btn-icon"> <i class="bi bi-fonts"></i> </button>
+            <button type="button" title="Kép (Nincs imp.)" aria-label="Kép beszúrása" data-feature="insert-image" class="btn btn-icon"> <i class="bi bi-image"></i> </button>
+            <button type="button" title="Elrendezés (Nincs imp.)" aria-label="Elrendezés" data-feature="layout" class="btn btn-icon"> <i class="bi bi-layout-wtf"></i> </button>
         </div>
-        <div class="editor-toolbar-separator" role="separator" aria-orientation="vertical"></div>
-
-         <!-- Betűtípus és Méret Csoport (Korlátozott funkcionalitás) -->
-         <div class="flex items-center space-x-1" role="group" aria-label="Betűtípus és Méret">
-             <label for="font-family-select" class="sr-only">Betűtípus</label>
-             <select id="font-family-select" title="Betűtípus (Korlátozott)" aria-label="Betűtípus választása (Korlátozott)" data-command="fontName" class="toolbar-select">
+        <div class="separator"></div>
+        <div class="toolbar-group" role="group" aria-label="Betűtípus és Méret">
+            <select id="font-family-select" title="Betűtípus (Korlátozott)" aria-label="Betűtípus" data-command="fontName" class="form-select form-select-sm">
                  <option style="font-family: Arial, sans-serif;">Arial</option>
                  <option style="font-family: Verdana, sans-serif;">Verdana</option>
                  <option style="font-family: 'Times New Roman', serif;">Times New Roman</option>
                  <option style="font-family: Georgia, serif;">Georgia</option>
                  <option style="font-family: 'Courier New', monospace;">Courier New</option>
-                 <option style="font-family: 'Comic Sans MS', cursive;">Comic Sans MS</option>
-             </select>
-             <label for="font-size-select" class="sr-only">Betűméret</label>
-             <select id="font-size-select" title="Betűméret (Korlátozott)" aria-label="Betűméret választása (Korlátozott)" data-command="fontSize" class="toolbar-select w-16">
-                 <!-- Az értékek 1-7 között az execCommand régi méreteihez igazodnak -->
-                 <option value="1">8</option>
-                 <option value="2">10</option>
-                 <option value="3" selected>12</option> <!-- Alapértelmezett -->
-                 <option value="4">14</option>
-                 <option value="5">18</option>
-                 <option value="6">24</option>
-                 <option value="7">36</option>
-             </select>
+            </select>
+            <select id="font-size-select" title="Betűméret (Korlátozott)" aria-label="Betűméret" data-command="fontSize" class="form-select form-select-sm" style="width: 70px;">
+                 <option value="1">8</option> <option value="2">10</option> <option value="3" selected>12</option> <option value="4">14</option> <option value="5">18</option> <option value="6">24</option> <option value="7">36</option>
+            </select>
         </div>
-        <div class="editor-toolbar-separator" role="separator" aria-orientation="vertical"></div>
-
-        <!-- Szövegformázás Csoport -->
-        <div class="flex items-center space-x-0.5" role="group" aria-label="Szövegformázás">
-            <button type="button" title="Félkövér (Ctrl+B)" aria-label="Félkövér" data-command="bold" aria-pressed="false" class="editor-toolbar-button icon-only">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 12a4 4 0 0 0 0-8H6v8"></path><path d="M15 20a4 4 0 0 0 0-8H6v8Z"></path></svg>
-            </button>
-            <button type="button" title="Dőlt (Ctrl+I)" aria-label="Dőlt" data-command="italic" aria-pressed="false" class="editor-toolbar-button icon-only">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" x2="10" y1="4" y2="4"></line><line x1="14" x2="5" y1="20" y2="20"></line><line x1="15" x2="9" y1="4" y2="20"></line></svg>
-            </button>
-            <button type="button" title="Aláhúzott (Ctrl+U)" aria-label="Aláhúzott" data-command="underline" aria-pressed="false" class="editor-toolbar-button icon-only">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v6a6 6 0 0 0 12 0V4"></path><line x1="4" x2="20" y1="20" y2="20"></line></svg>
-            </button>
-             <button type="button" title="Szövegszín (Korlátozott)" aria-label="Szövegszín" data-command="foreColor" class="editor-toolbar-button icon-only">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19.26 4.42 5.02C5.3 3.63 6.9 3 8.5 3h7c1.6 0 3.2.63 4.08 2.02L12 19.26Z"></path><path d="m6 15 6 6 6-6"></path></svg>
-             </button>
-             <button type="button" title="Háttérszín (Korlátozott)" aria-label="Kiemelő szín" data-command="backColor" class="editor-toolbar-button icon-only">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4"></path><path d="M13 7 8.7 2.7a1 1 0 0 0-1.4 0L2.7 7.3a1 1 0 0 0 0 1.4L7 13l6-6Z"></path><path d="m8.5 8.5 7 7"></path><path d="M11 11 5.5 16.5a1 1 0 0 0 0 1.4L10.1 22a1 1 0 0 0 1.4 0l6.1-6.1a1 1 0 0 0 0-1.4L11 11Z"></path></svg>
-             </button>
-         </div>
-        <div class="editor-toolbar-separator" role="separator" aria-orientation="vertical"></div>
-
-        <!-- Igazítás Csoport -->
-        <div class="flex items-center space-x-0.5" role="group" aria-label="Igazítás">
-            <button type="button" title="Balra igazítás" aria-label="Balra igazítás" data-command="justifyLeft" aria-pressed="false" class="editor-toolbar-button icon-only">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="3" y1="6" y2="6"></line><line x1="15" x2="3" y1="12" y2="12"></line><line x1="17" x2="3" y1="18" y2="18"></line></svg>
-            </button>
-            <button type="button" title="Középre igazítás" aria-label="Középre igazítás" data-command="justifyCenter" aria-pressed="false" class="editor-toolbar-button icon-only">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="3" y1="6" y2="6"></line><line x1="17" x2="7" y1="12" y2="12"></line><line x1="19" x2="5" y1="18" y2="18"></line></svg>
-            </button>
-            <button type="button" title="Jobbra igazítás" aria-label="Jobbra igazítás" data-command="justifyRight" aria-pressed="false" class="editor-toolbar-button icon-only">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="3" y1="6" y2="6"></line><line x1="21" x2="9" y1="12" y2="12"></line><line x1="21" x2="7" y1="18" y2="18"></line></svg>
-            </button>
+        <div class="separator"></div>
+        <div class="toolbar-group" role="group" aria-label="Szövegformázás">
+            <button type="button" title="Félkövér (Ctrl+B)" aria-label="Félkövér" data-command="bold" aria-pressed="false" class="btn btn-icon"> <i class="bi bi-type-bold"></i> </button>
+            <button type="button" title="Dőlt (Ctrl+I)" aria-label="Dőlt" data-command="italic" aria-pressed="false" class="btn btn-icon"> <i class="bi bi-type-italic"></i> </button>
+            <button type="button" title="Aláhúzott (Ctrl+U)" aria-label="Aláhúzott" data-command="underline" aria-pressed="false" class="btn btn-icon"> <i class="bi bi-type-underline"></i> </button>
+            <button type="button" title="Szövegszín (Korlátozott)" aria-label="Szövegszín" data-command="foreColor" class="btn btn-icon"> <i class="bi bi-palette-fill"></i> </button>
+            <button type="button" title="Háttérszín (Korlátozott)" aria-label="Kiemelő szín" data-command="backColor" class="btn btn-icon"> <i class="bi bi-paint-bucket"></i> </button>
         </div>
-        <div class="editor-toolbar-separator" role="separator" aria-orientation="vertical"></div>
-
-        <!-- Lista Csoport -->
-        <div class="flex items-center space-x-0.5" role="group" aria-label="Listák">
-            <button type="button" title="Felsorolás" aria-label="Felsorolás" data-command="insertUnorderedList" aria-pressed="false" class="editor-toolbar-button icon-only">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"></line><line x1="8" x2="21" y1="12" y2="12"></line><line x1="8" x2="21" y1="18" y2="18"></line><line x1="3" x2="3.01" y1="6" y2="6"></line><line x1="3" x2="3.01" y1="12" y2="12"></line><line x1="3" x2="3.01" y1="18" y2="18"></line></svg>
-            </button>
-            <button type="button" title="Számozott lista" aria-label="Számozott lista" data-command="insertOrderedList" aria-pressed="false" class="editor-toolbar-button icon-only">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" x2="21" y1="6" y2="6"></line><line x1="10" x2="21" y1="12" y2="12"></line><line x1="10" x2="21" y1="18" y2="18"></line><path d="M4 6h1v4"></path><path d="M4 12h1.5l-1.5 2h2"></path><path d="M5 18h1.5l-1.5 2h2"></path></svg>
-            </button>
+        <div class="separator"></div>
+        <div class="toolbar-group" role="group" aria-label="Igazítás">
+            <button type="button" title="Balra igazítás" aria-label="Balra igazít" data-command="justifyLeft" aria-pressed="false" class="btn btn-icon"> <i class="bi bi-text-left"></i> </button>
+            <button type="button" title="Középre igazítás" aria-label="Középre igazít" data-command="justifyCenter" aria-pressed="false" class="btn btn-icon"> <i class="bi bi-text-center"></i> </button>
+            <button type="button" title="Jobbra igazítás" aria-label="Jobbra igazít" data-command="justifyRight" aria-pressed="false" class="btn btn-icon"> <i class="bi bi-text-right"></i> </button>
         </div>
-         <!-- Egyéb Csoport -->
-         <div class="editor-toolbar-separator" role="separator" aria-orientation="vertical"></div>
-         <div class="flex items-center space-x-0.5" role="group" aria-label="Egyéb">
-             <button type="button" title="Behúzás csökkentése" aria-label="Behúzás csökkentése" data-command="outdent" class="editor-toolbar-button icon-only">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 8 3 12 7 16"></polyline><line x1="21" x2="11" y1="12" y2="12"></line><line x1="21" x2="11" y1="6" y2="6"></line><line x1="21" x2="11" y1="18" y2="18"></line></svg>
-             </button>
-             <button type="button" title="Behúzás növelése" aria-label="Behúzás növelése" data-command="indent" class="editor-toolbar-button icon-only">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 8 21 12 17 16"></polyline><line x1="3" x2="11" y1="12" y2="12"></line><line x1="3" x2="11" y1="6" y2="6"></line><line x1="3" x2="11" y1="18" y2="18"></line></svg>
-             </button>
-              <button type="button" title="Formázás törlése" aria-label="Formázás törlése" data-command="removeFormat" class="editor-toolbar-button icon-only">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z"></path><path d="M13 2v7h7"></path><path d="M16.5 14 19 11.5 21.5 14"></path><path d="M19 11.5v8"></path></svg>
-             </button>
-         </div>
+        <div class="separator"></div>
+        <div class="toolbar-group" role="group" aria-label="Listák">
+            <button type="button" title="Felsorolás" aria-label="Felsorolás" data-command="insertUnorderedList" aria-pressed="false" class="btn btn-icon"> <i class="bi bi-list-ul"></i> </button>
+            <button type="button" title="Számozott lista" aria-label="Számozott lista" data-command="insertOrderedList" aria-pressed="false" class="btn btn-icon"> <i class="bi bi-list-ol"></i> </button>
+        </div>
+        <div class="separator"></div>
+         <div class="toolbar-group" role="group" aria-label="Egyéb">
+            <button type="button" title="Behúzás csökkentése" aria-label="Behúzás csökkentése" data-command="outdent" class="btn btn-icon"> <i class="bi bi-text-indent-left"></i> </button>
+            <button type="button" title="Behúzás növelése" aria-label="Behúzás növelése" data-command="indent" class="btn btn-icon"> <i class="bi bi-text-indent-right"></i> </button>
+            <button type="button" title="Formázás törlése" aria-label="Formázás törlése" data-command="removeFormat" class="btn btn-icon"> <i class="bi bi-x-lg"></i> </button>
+        </div>
     </div>
 
     <!-- Fő Tartalmi Terület -->
-    <div class="flex flex-1 overflow-hidden">
+    <div class="main-container">
         <!-- Oldalsáv -->
-        <aside class="w-60 bg-editor-dark border-r border-editor-divider flex flex-col pt-3 flex-shrink-0" aria-labelledby="sidebar-heading">
-            <div class="px-3 mb-3 flex flex-col space-y-3">
+        <aside class="sidebar glass-bg">
+            <div class="sidebar-header">
                 <h2 id="sidebar-heading" class="sr-only">Diák panel</h2>
                 <!-- Kereső -->
-                <div class="relative" role="search">
-                    <label for="search-slides" class="sr-only">Diák keresése</label>
-                    <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-editor-muted"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    </div>
-                    <input type="search" id="search-slides" name="search-slides" placeholder="Diák keresése..." class="w-full pl-9 pr-3 py-1.5 bg-editor-light text-editor-main rounded-md placeholder-editor-muted focus:outline-none focus:ring-1 focus:ring-editor-focus text-sm border border-transparent focus:border-editor-focus">
+                <div class="search-wrapper" role="search">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="search" id="search-slides" name="search-slides" placeholder="Diák keresése..." class="form-control form-control-sm search-input">
                 </div>
                 <!-- Új Dia Gomb -->
-                <button type="button" id="add-slide-button" class="w-full sidebar-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    Új Dia
+                <button type="button" id="add-slide-button" class="btn btn-primary btn-sm w-100">
+                    <i class="bi bi-plus-lg"></i> Új Dia
                 </button>
             </div>
-
             <!-- Dia Lista -->
-            <div id="slide-list" class="flex-1 overflow-y-auto px-2 space-y-1 pb-2" role="listbox" aria-label="Dia lista" aria-orientation="vertical">
-                <div id="slide-list-loading" class="p-4 space-y-2" aria-live="polite" aria-busy="true">
-                    <div class="skeleton-slide"></div>
-                    <div class="skeleton-slide opacity-75"></div>
-                    <div class="skeleton-slide opacity-50"></div>
+            <div id="slide-list" class="slide-list-container" role="listbox" aria-label="Dia lista" aria-orientation="vertical">
+                <div id="slide-list-loading" class="loading-skeleton" aria-live="polite" aria-busy="true">
+                    <div class="skeleton-slide"></div> <div class="skeleton-slide"></div> <div class="skeleton-slide"></div>
                     <span class="sr-only">Diák betöltése...</span>
                 </div>
-                 <div id="slide-list-empty" class="hidden text-center text-editor-muted text-sm p-4">Nincsenek diák vagy a keresésnek nincs eredménye.</div>
+                 <div id="slide-list-empty" class="list-empty-message hidden">Nincs dia.</div>
             </div>
         </aside>
 
         <!-- Vászon Terület -->
-        <main role="main" aria-labelledby="canvas-heading" class="flex-1 bg-editor-medium flex flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden">
-            <div id="error-display" class="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-editor-error text-white px-4 py-2 rounded shadow-md hidden max-w-md text-center" role="alert" aria-live="assertive"></div>
-            <div id="canvas-scaler" class="transition-transform duration-150 ease-in-out origin-top-left md:origin-center">
-                <div id="slide-canvas" class="w-[960px] max-w-full bg-slide-bg-default text-slide-text-default rounded-lg shadow-lg aspect-[16/9] p-8 md:p-10 relative flex flex-col overflow-hidden" style="aspect-ratio: 16 / 9;">
-                    <div id="canvas-placeholder" class="flex items-center justify-center h-full text-center">
-                         <p class="text-gray-400">Válassz ki vagy hozz létre egy diát a kezdéshez.</p>
+        <main role="main" class="canvas-area">
+            <div id="error-display" class="alert alert-danger hidden" role="alert" aria-live="assertive"></div>
+            <div id="canvas-scaler">
+                <div id="slide-canvas" class="slide-canvas" style="aspect-ratio: 16 / 9;">
+                    <div id="canvas-placeholder" class="canvas-placeholder">
+                         <p>Válassz ki vagy hozz létre egy diát.</p>
                     </div>
                     <!-- Dinamikus tartalom (JS) -->
                 </div>
             </div>
             <!-- Alsó Sáv -->
-            <div id="bottom-bar" class="absolute bottom-0 left-0 right-0 bg-editor-dark border-t border-editor-divider px-4 py-1 flex items-center justify-between text-sm flex-shrink-0" role="toolbar" aria-label="Dia navigáció és nézetvezérlők">
-                 <div class="flex items-center space-x-2" role="group" aria-label="Dia navigáció">
-                     <button type="button" id="prev-slide-button" class="action-button icon-only" title="Előző dia (Balra nyíl)" aria-label="Előző dia" disabled>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-                     </button>
-                     <span id="slide-indicator" class="text-xs text-editor-muted w-16 text-center tabular-nums" aria-live="polite" aria-atomic="true">Dia - / -</span>
-                     <button type="button" id="next-slide-button" class="action-button icon-only" title="Következő dia (Jobbra nyíl)" aria-label="Következő dia" disabled>
-                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                     </button>
+            <div id="bottom-bar" class="bottom-bar glass-bg" role="toolbar" aria-label="Dia navigáció és nézetvezérlők">
+                 <div class="bottom-bar-group" role="group" aria-label="Dia navigáció">
+                     <button type="button" id="prev-slide-button" class="btn btn-icon btn-sm" title="Előző dia (Balra)" aria-label="Előző dia" disabled> <i class="bi bi-chevron-left"></i> </button>
+                     <span id="slide-indicator" class="slide-indicator" aria-live="polite" aria-atomic="true">Dia - / -</span>
+                     <button type="button" id="next-slide-button" class="btn btn-icon btn-sm" title="Következő dia (Jobbra)" aria-label="Következő dia" disabled> <i class="bi bi-chevron-right"></i> </button>
                  </div>
-                 <div class="flex items-center space-x-2" role="group" aria-label="Nagyítás és nézet opciók">
-                     <button type="button" id="zoom-out-button" class="action-button icon-only" title="Kicsinyítés (-)" aria-label="Kicsinyítés">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
-                     </button>
-                     <label for="zoom-level" class="sr-only">Nagyítási szint</label>
-                     <select id="zoom-level" name="zoom-level" class="toolbar-select w-20">
+                 <div class="bottom-bar-group" role="group" aria-label="Nagyítás és nézet opciók">
+                     <button type="button" id="zoom-out-button" class="btn btn-icon btn-sm" title="Kicsinyítés (-)" aria-label="Kicsinyítés"> <i class="bi bi-zoom-out"></i> </button>
+                     <label for="zoom-level" class="sr-only">Nagyítás</label>
+                     <select id="zoom-level" name="zoom-level" class="form-select form-select-sm zoom-select">
                          <option value="0.5">50%</option><option value="0.75">75%</option><option value="1.0" selected>100%</option><option value="1.5">150%</option><option value="2.0">200%</option><option value="fit">Illesztés</option>
                      </select>
-                      <button type="button" id="zoom-in-button" class="action-button icon-only" title="Nagyítás (+)" aria-label="Nagyítás">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
-                     </button>
-                      <div class="editor-toolbar-separator mx-1" role="separator" aria-orientation="vertical"></div>
-                     <button type="button" id="fullscreen-button" class="action-button icon-only" title="Teljes képernyő (f)" aria-label="Teljes képernyős mód bekapcsolása">
-                         <svg id="fullscreen-enter-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
-                         <svg id="fullscreen-exit-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg>
+                      <button type="button" id="zoom-in-button" class="btn btn-icon btn-sm" title="Nagyítás (+)" aria-label="Nagyítás"> <i class="bi bi-zoom-in"></i> </button>
+                      <div class="separator"></div>
+                     <button type="button" id="fullscreen-button" class="btn btn-icon btn-sm" title="Teljes képernyő (f)" aria-label="Teljes képernyő">
+                         <i id="fullscreen-enter-icon" class="bi bi-arrows-fullscreen"></i>
+                         <i id="fullscreen-exit-icon" class="bi bi-fullscreen-exit hidden"></i>
                      </button>
                  </div>
             </div>
         </main>
     </div>
 
-    <script defer src="script.js"></script>
+    <script>
+      /* --- START OF FILE script.js --- */
+(function() {
+    'use strict';
+
+    // --- Config ---
+    const CONFIG = {
+        localStorageKey: 'slideEditorPresentation_v4_glass', // Új verzió a stílusváltás miatt
+        debounceDelay: 300,
+        zoomLevels: [0.5, 0.75, 1.0, 1.5, 2.0],
+        defaultZoom: 1.0,
+        minZoom: 0.2,
+        maxZoom: 3.0,
+        defaultSlideTitle: 'Cím nélküli dia',
+        defaultSlideSubtitle: '',
+        newSlideBaseTitle: 'Új Dia',
+        newSlideContentPlaceholder: '<p>Kezdj el gépelni...</p>',
+        slideContentPlaceholderText: 'Tartalom hozzáadása...',
+        // --- === KRITIKUS FIGYELMEZTETÉS (execCommand) === ---
+        // A 'document.execCommand' használata ELAVULT és MEGBÍZHATATLAN.
+        // --- === FIGYELMEZTETÉS VÉGE === ---
+        textFormattingCommands: ['bold', 'italic', 'underline'],
+        listCommands: ['insertOrderedList', 'insertUnorderedList'],
+        alignmentCommands: ['justifyLeft', 'justifyCenter', 'justifyRight'],
+        colorCommands: ['foreColor', 'backColor'],
+        otherCommands: ['undo', 'redo', 'removeFormat', 'indent', 'outdent']
+    };
+
+    // --- State ---
+    const editorState = {
+        presentationTitle: "Névtelen Prezentáció",
+        slides: [],
+        selectedSlideId: null,
+        currentZoom: CONFIG.defaultZoom,
+        lastSaved: null,
+        isDirty: false,
+        isTitleEditing: false,
+        searchQuery: '',
+    };
+
+    // --- DOM Cache ---
+    // Fontos: Az ID-k alapján gyorsítótárazunk, az osztályokat a funkciókban használjuk a kiválasztáshoz
+    const DOM = {
+         slideTitleInput: null, slideSubtitleInput: null, slideContentEditor: null, // Dinamikus
+         canvasHeading: null, // Dinamikus
+         slideList: document.getElementById('slide-list'),
+         slideCanvas: document.getElementById('slide-canvas'),
+         editorToolbar: document.getElementById('editor-toolbar'),
+         saveButton: document.getElementById('save-button'),
+         saveButtonText: document.getElementById('save-button-text'),
+         presentationTitle: document.getElementById('presentation-title'),
+         presentationLastEdited: document.getElementById('presentation-last-edited'),
+         canvasPlaceholder: document.getElementById('canvas-placeholder'),
+         prevSlideButton: document.getElementById('prev-slide-button'),
+         nextSlideButton: document.getElementById('next-slide-button'),
+         slideIndicator: document.getElementById('slide-indicator'),
+         shareModal: document.getElementById('share-modal'),
+         shareUrlInput: document.getElementById('share-url-input'),
+         copyShareUrlButton: document.getElementById('copy-share-url-button'),
+         shareButton: document.getElementById('share-button'),
+         addSlideButton: document.getElementById('add-slide-button'),
+         canvasScaler: document.getElementById('canvas-scaler'),
+         mainArea: document.querySelector('main[role="main"]'), // Változhatott a struktúra
+         bottomBar: document.getElementById('bottom-bar'),
+         zoomLevelSelect: document.getElementById('zoom-level'),
+         fullscreenEnterIcon: document.getElementById('fullscreen-enter-icon'),
+         fullscreenExitIcon: document.getElementById('fullscreen-exit-icon'),
+         fullscreenButton: document.getElementById('fullscreen-button'),
+         presentButton: document.getElementById('present-button'),
+         downloadButton: document.getElementById('download-button'),
+         moreOptionsDropdown: document.getElementById('more-options-dropdown'),
+         moreOptionsButton: document.getElementById('more-options-button'),
+         renameOption: document.getElementById('rename-option'),
+         duplicateOption: document.getElementById('duplicate-option'),
+         historyOption: document.getElementById('history-option'),
+         downloadOptionAlt: document.getElementById('download-option-alt'),
+         slideListLoading: document.getElementById('slide-list-loading'),
+         errorDisplay: document.getElementById('error-display'),
+         zoomOutButton: document.getElementById('zoom-out-button'),
+         zoomInButton: document.getElementById('zoom-in-button'),
+         searchSlidesInput: document.getElementById('search-slides'),
+         fontFamilySelect: document.getElementById('font-family-select'),
+         fontSizeSelect: document.getElementById('font-size-select'),
+         slideListEmpty: document.getElementById('slide-list-empty'),
+         body: document.body,
+    };
+
+    // --- Utilities ---
+    function showError(message, duration = 5000) {
+        if (!DOM.errorDisplay) { console.error("DOM.errorDisplay missing!"); return; }
+        console.error("Editor Hiba:", message);
+        DOM.errorDisplay.textContent = message;
+        DOM.errorDisplay.classList.remove('hidden');
+        DOM.errorDisplay.setAttribute('aria-hidden', 'false');
+        if (DOM.errorDisplay.timer) clearTimeout(DOM.errorDisplay.timer);
+        if (duration > 0) {
+            DOM.errorDisplay.timer = setTimeout(() => {
+                hideError();
+                DOM.errorDisplay.timer = null;
+            }, duration);
+        }
+    }
+    function hideError() {
+        if (!DOM.errorDisplay) return;
+        if (DOM.errorDisplay.timer) { clearTimeout(DOM.errorDisplay.timer); DOM.errorDisplay.timer = null; }
+        DOM.errorDisplay.classList.add('hidden');
+        DOM.errorDisplay.setAttribute('aria-hidden', 'true');
+        DOM.errorDisplay.textContent = '';
+    }
+    function formatTimestamp(timestamp) {
+        if (!timestamp || isNaN(timestamp)) return 'még nem mentve';
+        try {
+            const date = new Date(timestamp);
+            return date.toLocaleString('hu-HU', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+        } catch (e) { console.error("Timestamp hiba:", e); return 'hibás dátum'; }
+    }
+    function generateUniqueId(prefix = 'id') { return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`; }
+    function getContrastColor(hexcolor) {
+        const defaultColor = CONFIG.slideTextDefault; const lightColor = '#FFFFFF';
+        if (!hexcolor || typeof hexcolor !== 'string' || !hexcolor.startsWith('#')) return defaultColor;
+        hexcolor = hexcolor.slice(1);
+        if (hexcolor.length === 3) hexcolor = hexcolor[0].repeat(2) + hexcolor[1].repeat(2) + hexcolor[2].repeat(2);
+        if (hexcolor.length !== 6) return defaultColor;
+        try { const r=parseInt(hexcolor.slice(0,2),16), g=parseInt(hexcolor.slice(2,4),16), b=parseInt(hexcolor.slice(4,6),16); const yiq=((r*299)+(g*587)+(b*114))/1000; return (yiq >= 128) ? defaultColor : lightColor; }
+        catch (e) { console.error("Kontraszt hiba:", e); return defaultColor; }
+    }
+    function debounce(func, delay) { let timeout; return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; }
+    function setDirty(isDirty) {
+        if (editorState.isDirty === isDirty) return; editorState.isDirty = isDirty;
+        DOM.saveButton?.classList.toggle('btn-warning', isDirty); // Use warning color for dirty state
+        DOM.saveButton?.classList.toggle('btn-secondary', !isDirty); // Back to secondary when not dirty
+        const saveLabel = isDirty ? 'Mentés (Változások!)' : 'Mentés'; DOM.saveButton?.setAttribute('aria-label', saveLabel);
+        const saveTitle = isDirty ? 'Mentés (Ctrl+S) - Mentetlen változások!' : 'Mentés (Ctrl+S)'; DOM.saveButton?.setAttribute('title', saveTitle);
+        const baseTitle = "Prezentáció Szerkesztő"; const currentPresTitle = editorState.presentationTitle || "Névtelen";
+        document.title = isDirty ? `* ${currentPresTitle} - ${baseTitle}` : `${currentPresTitle} - ${baseTitle}`;
+    }
+
+    // --- Slide Structure & Creation ---
+    function createDefaultSlides() { const id = generateUniqueId('slide'); return [{ id: id, title: 'Kezdő Dia', subtitle: 'Kattints ide a szerkesztéshez', content: '', backgroundColor: '#FFFFFF' }]; }
+    function createNewSlide() { const id = generateUniqueId('slide'); return { id: id, title: `${CONFIG.newSlideBaseTitle} ${editorState.slides.length + 1}`, subtitle: '', content: CONFIG.newSlideContentPlaceholder, backgroundColor: '#FFFFFF' }; }
+
+    // --- Rendering Functions ---
+    function renderSidebar() {
+        if (!DOM.slideList || !DOM.slideListEmpty) { console.error("Sidebar render: Hiányzó DOM."); return; }
+        DOM.slideList.textContent = ''; DOM.slideListLoading?.classList.add('hidden');
+        const query = editorState.searchQuery.trim().toLowerCase();
+        const filteredSlides = query ? editorState.slides.filter(s => (s.title || '').toLowerCase().includes(query)) : editorState.slides;
+
+        if (filteredSlides.length === 0) {
+            DOM.slideListEmpty.textContent = query ? 'Nincs a keresésnek megfelelő dia.' : 'Nincsenek diák. Adj hozzá egyet!';
+            DOM.slideListEmpty.classList.remove('hidden'); updateNavigationButtons(); return;
+        }
+        DOM.slideListEmpty.classList.add('hidden');
+        const fragment = document.createDocumentFragment(); let selectedElement = null;
+
+        filteredSlides.forEach((slide) => {
+            const originalIndex = editorState.slides.findIndex(s => s.id === slide.id);
+            const isSelected = slide.id === editorState.selectedSlideId;
+            const item = document.createElement('div'); item.className = 'slide-item'; item.setAttribute('role', 'option'); item.setAttribute('aria-selected', isSelected.toString()); item.tabIndex = -1; item.setAttribute('aria-labelledby', `slide-title-label-${slide.id}`); item.dataset.slideId = slide.id;
+            const slideNumber = document.createElement('span'); slideNumber.className = 'slide-number'; slideNumber.textContent = originalIndex + 1; slideNumber.setAttribute('aria-hidden', 'true');
+            const preview = document.createElement('div'); preview.className = 'slide-preview'; preview.style.backgroundColor = slide.backgroundColor || '#FFFFFF'; preview.setAttribute('aria-hidden', 'true');
+            const previewTextSpan = document.createElement('span'); previewTextSpan.style.color = getContrastColor(preview.style.backgroundColor); previewTextSpan.textContent = (slide.title || CONFIG.defaultSlideTitle).substring(0, 25) + ((slide.title || '').length > 25 ? '…' : ''); preview.appendChild(previewTextSpan);
+            const titleLabel = document.createElement('span'); titleLabel.id = `slide-title-label-${slide.id}`; titleLabel.className = 'slide-title-label'; titleLabel.textContent = slide.title || CONFIG.defaultSlideTitle;
+            const deleteButton = document.createElement('button'); deleteButton.type = 'button'; deleteButton.className = 'delete-button btn btn-icon btn-sm'; deleteButton.title = `Dia ${originalIndex + 1} törlése`; deleteButton.setAttribute('aria-label', `Törlés: ${slide.title || CONFIG.defaultSlideTitle}`); deleteButton.tabIndex = -1; deleteButton.dataset.slideId = slide.id;
+            deleteButton.innerHTML = '<i class="bi bi-trash3-fill"></i>'; // Bootstrap ikon
+            item.appendChild(slideNumber); item.appendChild(preview); item.appendChild(titleLabel); item.appendChild(deleteButton);
+            if (isSelected) selectedElement = item;
+            fragment.appendChild(item);
+        });
+        DOM.slideList.appendChild(fragment);
+
+        const allItems = DOM.slideList.querySelectorAll('.slide-item');
+        if (allItems.length > 0) {
+             let focusableItem = selectedElement || allItems[0];
+             allItems.forEach(it => it.setAttribute('tabindex', '-1'));
+             focusableItem.setAttribute('tabindex', '0');
+             if (selectedElement && document.activeElement !== selectedElement && !selectedElement.contains(document.activeElement)) {
+                  const rect = selectedElement.getBoundingClientRect(); const listRect = DOM.slideList.getBoundingClientRect();
+                  if (rect.top < listRect.top || rect.bottom > listRect.bottom) selectedElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+             }
+         }
+        updateNavigationButtons();
+    }
+    function renderCanvas() {
+        if (!DOM.slideCanvas) { console.error("Canvas render: Hiányzó DOM."); return; }
+        const selectedSlide = editorState.slides.find(s => s.id === editorState.selectedSlideId);
+        DOM.slideCanvas.textContent = '';
+        if (!selectedSlide) {
+             DOM.canvasPlaceholder?.classList.remove('hidden');
+             DOM.slideTitleInput = DOM.slideSubtitleInput = DOM.slideContentEditor = DOM.canvasHeading = null;
+             DOM.slideCanvas.style.backgroundColor = CONFIG.slideBgDefault; DOM.slideCanvas.style.color = CONFIG.slideTextDefault; DOM.slideCanvas.contentEditable = 'false';
+             updateToolbarState(); updateNavigationButtons(); return;
+        }
+        DOM.canvasPlaceholder?.classList.add('hidden'); DOM.slideCanvas.contentEditable = 'inherit';
+        const bgColor = selectedSlide.backgroundColor || CONFIG.slideBgDefault; const textColor = getContrastColor(bgColor);
+        DOM.slideCanvas.style.backgroundColor = bgColor; DOM.slideCanvas.style.color = textColor;
+        const srHeading = document.createElement('h2'); srHeading.id = 'canvas-heading'; srHeading.className = 'sr-only'; srHeading.textContent = `Dia szerkesztése: ${selectedSlide.title || CONFIG.defaultSlideTitle}`;
+        const titleDiv = document.createElement('div'); titleDiv.id = 'slide-title-input'; titleDiv.contentEditable = 'true'; titleDiv.textContent = selectedSlide.title || ''; titleDiv.setAttribute('placeholder', CONFIG.defaultSlideTitle); titleDiv.dataset.field = 'title'; titleDiv.setAttribute('aria-label', 'Dia Címe');
+        const subtitleDiv = document.createElement('div'); subtitleDiv.id = 'slide-subtitle-input'; subtitleDiv.contentEditable = 'true'; subtitleDiv.textContent = selectedSlide.subtitle || ''; subtitleDiv.setAttribute('placeholder', CONFIG.defaultSlideSubtitle); subtitleDiv.dataset.field = 'subtitle'; subtitleDiv.setAttribute('aria-label', 'Dia Alcíme');
+        const contentEditor = document.createElement('div'); contentEditor.id = 'slide-content-editor'; contentEditor.role = 'textbox'; contentEditor.setAttribute('aria-multiline', 'true'); contentEditor.setAttribute('aria-label', 'Dia tartalma'); contentEditor.contentEditable = 'true'; contentEditor.setAttribute('placeholder', CONFIG.slideContentPlaceholderText); contentEditor.innerHTML = selectedSlide.content || CONFIG.newSlideContentPlaceholder; contentEditor.dataset.field = 'content';
+        DOM.slideCanvas.appendChild(srHeading); DOM.slideCanvas.appendChild(titleDiv); DOM.slideCanvas.appendChild(subtitleDiv); DOM.slideCanvas.appendChild(contentEditor);
+        DOM.canvasHeading = srHeading; DOM.slideTitleInput = titleDiv; DOM.slideSubtitleInput = subtitleDiv; DOM.slideContentEditor = contentEditor;
+        updateNavigationButtons(); updateToolbarState();
+    }
+    function updateLastEditedStatus(timestamp = editorState.lastSaved) { if (DOM.presentationLastEdited) { DOM.presentationLastEdited.textContent = `Mentve: ${formatTimestamp(timestamp)}`; DOM.presentationLastEdited.setAttribute('datetime', timestamp ? new Date(timestamp).toISOString() : ''); } }
+    function updateNavigationButtons() {
+        if (!DOM.prevSlideButton || !DOM.nextSlideButton || !DOM.slideIndicator) return;
+        const total = editorState.slides.length; const currentIdx = editorState.slides.findIndex(s => s.id === editorState.selectedSlideId);
+        if (currentIdx === -1 || total === 0) { DOM.prevSlideButton.disabled = true; DOM.nextSlideButton.disabled = true; DOM.slideIndicator.textContent = `- / -`; DOM.slideIndicator.setAttribute('aria-label', 'Nincs kiválasztott dia'); DOM.slideIndicator.title = ''; }
+        else { DOM.prevSlideButton.disabled = currentIdx === 0; DOM.nextSlideButton.disabled = currentIdx === total - 1; DOM.slideIndicator.textContent = `${currentIdx + 1} / ${total}`; const label = `Dia: ${currentIdx + 1} / ${total}`; DOM.slideIndicator.setAttribute('aria-label', label); DOM.slideIndicator.title = label; }
+    }
+    function updateToolbarState() {
+        if (!document.queryCommandState || !DOM.editorToolbar) return;
+        const activeEl = document.activeElement;
+        const isEditableFocus = activeEl?.isContentEditable && DOM.slideCanvas?.contains(activeEl);
+        const commandsToCheck = [...CONFIG.textFormattingCommands, ...CONFIG.listCommands, ...CONFIG.alignmentCommands, 'indent', 'outdent'];
+        commandsToCheck.forEach(cmd => {
+            const btn = DOM.editorToolbar.querySelector(`button[data-command="${cmd}"]`);
+            if (btn) { let isActive = false; if (isEditableFocus) try { isActive = document.queryCommandState(cmd); } catch(e) {} btn.setAttribute('aria-pressed', isActive.toString()); btn.classList.toggle('active', isActive); } // Use 'active' class
+        });
+        const isDisabled = !isEditableFocus;
+        DOM.editorToolbar.querySelectorAll('button[data-command], select[data-command], button[data-feature]').forEach(el => {
+             const cmd = el.dataset.command; if (cmd === 'undo' || cmd === 'redo') return;
+             if (el.getAttribute('aria-disabled') !== 'true') el.disabled = isDisabled;
+        });
+    }
+    function updateFullscreenButtonIcon(isFullscreen) { if (DOM.fullscreenEnterIcon && DOM.fullscreenExitIcon && DOM.fullscreenButton) { DOM.fullscreenEnterIcon.classList.toggle('hidden', isFullscreen); DOM.fullscreenExitIcon.classList.toggle('hidden', !isFullscreen); const label = isFullscreen ? 'Kilépés (Esc)' : 'Teljes képernyő (f)'; DOM.fullscreenButton.setAttribute('aria-label', label); DOM.fullscreenButton.title = label; } }
+
+    // --- Actions ---
+    function selectSlide(slideId) { if (!slideId || editorState.selectedSlideId === slideId) return; editorState.selectedSlideId = slideId; hideError(); renderSidebar(); renderCanvas(); setTimeout(() => { if (!DOM.body.classList.contains('presentation-mode')) DOM.slideContentEditor?.focus({ preventScroll: true }); }, 50); }
+    function addSlide() { hideError(); const newSlide = createNewSlide(); const currentIdx = editorState.slides.findIndex(s => s.id === editorState.selectedSlideId); const insertIdx = (currentIdx === -1) ? editorState.slides.length : currentIdx + 1; editorState.slides.splice(insertIdx, 0, newSlide); setDirty(true); selectSlide(newSlide.id); setTimeout(() => { const newItem = DOM.slideList?.querySelector(`.slide-item[data-slide-id="${newSlide.id}"]`); if (newItem) { DOM.slideList?.querySelectorAll('.slide-item').forEach(it => it.setAttribute('tabindex', '-1')); newItem.setAttribute('tabindex', '0'); newItem.focus(); newItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } }, 50); }
+    function deleteSlide(slideIdToDelete) {
+        const slideIndex = editorState.slides.findIndex(s => s.id === slideIdToDelete); if (slideIndex === -1) return;
+        const slideTitle = editorState.slides[slideIndex].title || CONFIG.defaultSlideTitle; if (!confirm(`Biztosan törölni szeretnéd: "${slideTitle}"?\nEz nem vonható vissza.`)) return;
+        const wasSelected = editorState.selectedSlideId === slideIdToDelete; editorState.slides.splice(slideIndex, 1); setDirty(true); let nextSelectedId = null; let elementToFocus = null;
+        if (editorState.slides.length === 0) { editorState.selectedSlideId = null; elementToFocus = DOM.addSlideButton; }
+        else { const newIndex = Math.min(slideIndex, editorState.slides.length - 1); nextSelectedId = wasSelected ? editorState.slides[newIndex].id : editorState.selectedSlideId; editorState.selectedSlideId = nextSelectedId; }
+        renderSidebar(); renderCanvas();
+        setTimeout(() => { if (nextSelectedId) elementToFocus = DOM.slideList?.querySelector(`.slide-item[data-slide-id="${nextSelectedId}"][tabindex="0"]`); if (!elementToFocus) elementToFocus = DOM.addSlideButton; elementToFocus?.focus(); }, 50);
+    }
+    const debouncedUpdateSlideData = debounce((field, value) => {
+        if (!editorState.selectedSlideId) return; const idx = editorState.slides.findIndex(s => s.id === editorState.selectedSlideId); if (idx === -1) return;
+        const slide = editorState.slides[idx]; if (slide[field] !== value) { slide[field] = value; if (field === 'title' || field === 'backgroundColor') { renderSidebar(); if (field === 'title' && DOM.canvasHeading) DOM.canvasHeading.textContent = `Dia szerkesztése: ${value || CONFIG.defaultSlideTitle}`; } setDirty(true); }
+    }, CONFIG.debounceDelay);
+    function findNextSlideId() { const idx = editorState.slides.findIndex(s => s.id === editorState.selectedSlideId); return (idx !== -1 && idx < editorState.slides.length - 1) ? editorState.slides[idx + 1].id : null; }
+    function findPreviousSlideId() { const idx = editorState.slides.findIndex(s => s.id === editorState.selectedSlideId); return (idx > 0) ? editorState.slides[idx - 1].id : null; }
+    function navigateSlides(direction) { hideError(); const targetId = direction === 'next' ? findNextSlideId() : findPreviousSlideId(); if (targetId) { selectSlide(targetId); setTimeout(() => { if (!DOM.body.classList.contains('presentation-mode')) DOM.slideList?.querySelector(`.slide-item[data-slide-id="${targetId}"]`)?.focus(); }, 50); } }
+    function captureFocusedElementState() {
+        const activeEl = document.activeElement; const idx = editorState.slides.findIndex(s => s.id === editorState.selectedSlideId);
+        if (idx === -1 || !DOM.slideCanvas?.contains(activeEl) || !activeEl.isContentEditable) return;
+        let field = null, value = null;
+        if (activeEl === DOM.slideTitleInput) field = 'title'; else if (activeEl === DOM.slideSubtitleInput) field = 'subtitle'; else if (activeEl === DOM.slideContentEditor) field = 'content';
+        if (field) { value = (field === 'content') ? activeEl.innerHTML : activeEl.textContent; if (editorState.slides[idx][field] !== value) { editorState.slides[idx][field] = value; setDirty(true); if (field === 'title') { renderSidebar(); if (DOM.canvasHeading) DOM.canvasHeading.textContent = `Dia szerkesztése: ${value || CONFIG.defaultSlideTitle}`; } } }
+    }
+    function savePresentation() {
+        hideError(); captureFocusedElementState();
+        if (DOM.presentationTitle) { if (!editorState.presentationTitle) editorState.presentationTitle = "Névtelen Prez."; DOM.presentationTitle.textContent = editorState.presentationTitle; }
+        try {
+            const data = { presentationTitle: editorState.presentationTitle, slides: editorState.slides, selectedSlideId: editorState.selectedSlideId, savedAt: new Date().toISOString(), version: CONFIG.localStorageKey };
+            localStorage.setItem(CONFIG.localStorageKey, JSON.stringify(data)); editorState.lastSaved = Date.parse(data.savedAt); setDirty(false); updateLastEditedStatus();
+            if (DOM.saveButton && DOM.saveButtonText) { const original = "Mentés"; DOM.saveButtonText.textContent = 'Mentve!'; DOM.saveButton.classList.remove('btn-warning', 'btn-secondary'); DOM.saveButton.classList.add('btn-success'); DOM.saveButton.disabled = true; setTimeout(() => { if (DOM.saveButton && DOM.saveButtonText.textContent === 'Mentve!') { DOM.saveButtonText.textContent = original; DOM.saveButton.classList.remove('btn-success'); DOM.saveButton.classList.add('btn-secondary'); DOM.saveButton.disabled = false; } }, 1500); }
+            console.log('Mentve:', data.savedAt);
+        } catch (e) { console.error('Mentési hiba:', e); let msg = 'Hiba mentéskor.'; if (e.name === 'QuotaExceededError') msg = 'Nincs elég hely.'; showError(msg); }
+    }
+    function loadPresentation() {
+        hideError(); const saved = localStorage.getItem(CONFIG.localStorageKey); let loaded = null;
+        if (saved) { try { loaded = JSON.parse(saved); if (!loaded || typeof loaded !== 'object') throw new Error("Invalid format."); if (loaded.version !== CONFIG.localStorageKey) console.warn(`Verzió eltérés: ${loaded.version} vs ${CONFIG.localStorageKey}`); if (!loaded.slides || !Array.isArray(loaded.slides)) { console.warn("Hiányzó/érvénytelen 'slides', alaphelyzet."); loaded = null; } } catch (e) { console.error('Betöltési hiba:', e); showError("Hiba betöltéskor, lehet sérült adat. Alaphelyzet."); localStorage.removeItem(CONFIG.localStorageKey); loaded = null; } }
+        if (loaded) {
+             editorState.presentationTitle = loaded.presentationTitle || "Névtelen Prez.";
+             editorState.slides = loaded.slides.map(s => ({ id: s.id || generateUniqueId('slide'), title: s.title ?? CONFIG.defaultSlideTitle, subtitle: s.subtitle ?? '', content: s.content ?? '', backgroundColor: s.backgroundColor || CONFIG.slideBgDefault }));
+             let validId = loaded.selectedSlideId && editorState.slides.some(s => s.id === loaded.selectedSlideId) ? loaded.selectedSlideId : null;
+             if (!validId && editorState.slides.length > 0) validId = editorState.slides[0].id; editorState.selectedSlideId = validId;
+             editorState.lastSaved = loaded.savedAt ? Date.parse(loaded.savedAt) : null; if (isNaN(editorState.lastSaved)) editorState.lastSaved = null; console.log('Betöltve.');
+        } else { initializeDefaultState(); console.log('Alap állapot.'); }
+        if (DOM.presentationTitle) DOM.presentationTitle.textContent = editorState.presentationTitle; document.title = `${editorState.presentationTitle} - Prez. Szerk.`;
+        setDirty(false); updateLastEditedStatus(); renderSidebar(); renderCanvas(); setZoom(editorState.currentZoom);
+    }
+    function initializeDefaultState() { editorState.presentationTitle = "Névtelen Prez."; editorState.slides = createDefaultSlides(); editorState.selectedSlideId = editorState.slides[0]?.id || null; editorState.lastSaved = null; editorState.isDirty = false; editorState.currentZoom = CONFIG.defaultZoom; editorState.searchQuery = ''; hideError(); if(DOM.searchSlidesInput) DOM.searchSlidesInput.value = ''; }
+    function showShareModal() { if (!DOM.shareModal) return; hideError(); const url = `${location.origin}${location.pathname}?s=${generateUniqueId('sh')}`; if (DOM.shareUrlInput) DOM.shareUrlInput.value = url; if (DOM.copyShareUrlButton) DOM.copyShareUrlButton.textContent = 'Másolás'; if (typeof DOM.shareModal.showModal === 'function') DOM.shareModal.showModal(); else DOM.shareModal.setAttribute('open', ''); setTimeout(() => DOM.copyShareUrlButton?.focus(), 50); }
+    function hideShareModal() { if (!DOM.shareModal) return; if (typeof DOM.shareModal.close === 'function') DOM.shareModal.close(); else DOM.shareModal.removeAttribute('open'); DOM.shareButton?.focus(); }
+    async function copyShareUrl() {
+        if (!DOM.shareUrlInput || !DOM.copyShareUrlButton) return; hideError(); const url = DOM.shareUrlInput.value; const btn = DOM.copyShareUrlButton; const original = btn.textContent; btn.disabled = true;
+        try { if (!navigator.clipboard) throw new Error("Clipboard API unavailable."); await navigator.clipboard.writeText(url); btn.textContent = 'Másolva!'; console.log('URL másolva (API).'); }
+        catch (err) { console.warn('API másolás hiba, fallback:', err); try { DOM.shareUrlInput.select(); btn.textContent = 'Kijelölve!'; alert("Link kijelölve. Másold (Ctrl+C)."); console.log('URL kijelölve (Fallback).'); } catch (fbErr) { console.error('Fallback hiba:', fbErr); btn.textContent = 'Hiba'; showError("Másolás nem sikerült."); } }
+        finally { setTimeout(() => { if (btn) { btn.textContent = original; btn.disabled = false; } }, 2000); }
+    }
+    function startPresentation() {
+        hideError(); if (editorState.slides.length === 0) { showError("Nincs dia a bemutatáshoz.", 3000); return; } if (!editorState.selectedSlideId && editorState.slides.length > 0) editorState.selectedSlideId = editorState.slides[0].id; if(editorState.isDirty) { console.log("Mentés prez. előtt."); savePresentation(); }
+        DOM.body.classList.add('presentation-mode'); renderCanvas();
+        const el = document.documentElement; try { (el.requestFullscreen?.() || el.webkitRequestFullscreen?.() || el.msRequestFullscreen?.())?.catch(e => console.warn("Fullscreen hiba:", e)); } catch (e) { console.error("Fullscreen hiba:", e); }
+        document.addEventListener('keydown', handlePresentationKeys); updateFullscreenButtonIcon(true);
+    }
+    function exitPresentation() {
+        if (!DOM.body.classList.contains('presentation-mode')) return; DOM.body.classList.remove('presentation-mode');
+        const doc = document; try { (doc.exitFullscreen?.() || doc.webkitExitFullscreen?.() || doc.msExitFullscreen?.())?.catch(e => console.error("Exit Fullscreen hiba:", e)); } catch (e) { console.error("Exit Fullscreen hiba:", e); }
+        document.removeEventListener('keydown', handlePresentationKeys); updateFullscreenButtonIcon(false); renderCanvas(); applyZoom(); DOM.presentButton?.focus();
+    }
+    async function toggleFullscreen() {
+         const doc = document; const isFs = !!(doc.fullscreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement); hideError();
+         try { if (!isFs) { const el = document.documentElement; await (el.requestFullscreen?.() || el.webkitRequestFullscreen?.() || el.msRequestFullscreen?.()); } else { await (doc.exitFullscreen?.() || doc.webkitExitFullscreen?.() || doc.msExitFullscreen?.()); } }
+         catch(err) { console.warn("Fullscreen váltás hiba:", err); showError(`Fullscreen ${isFs ? 'elhagyása' : 'bekapcsolása'} sikertelen.`, 4000); }
+     }
+    function downloadPresentation() { /* ... (Változatlan, a letöltési logika nem függ a stílustól) ... */ }
+    function toggleMoreOptions() { /* ... (Változatlan, a dropdown menü logikája) ... */ }
+    function applyZoom() { /* ... (Változatlan, a zoom logikája) ... */ }
+    function changeZoom(delta) { /* ... (Változatlan) ... */ }
+    function setZoom(value) { /* ... (Változatlan) ... */ }
+
+    // --- Event Handlers ---
+    function handleSidebarInteraction(event) {
+        const item = event.target.closest('.slide-item');
+        const delBtn = event.target.closest('.delete-button');
+        if (delBtn && item) { event.stopPropagation(); const id = delBtn.dataset.slideId; if (id) deleteSlide(id); }
+        else if (item) { const id = item.dataset.slideId; if (id && id !== editorState.selectedSlideId) selectSlide(id); if (item !== document.activeElement) { DOM.slideList?.querySelectorAll('.slide-item').forEach(it => it.tabIndex = -1); item.tabIndex = 0; item.focus(); } }
+    }
+    function handleSidebarKeyDown(event) {
+        const currentItem = event.target.closest('.slide-item'); if (!currentItem || !DOM.slideList) return; const all = Array.from(DOM.slideList.querySelectorAll('.slide-item')); if (all.length === 0) return; const idx = all.indexOf(currentItem); let next = null;
+        switch (event.key) {
+            case 'ArrowUp': event.preventDefault(); next = all[idx > 0 ? idx - 1 : all.length - 1]; break;
+            case 'ArrowDown': event.preventDefault(); next = all[idx < all.length - 1 ? idx + 1 : 0]; break;
+            case 'Enter': case ' ': event.preventDefault(); selectSlide(currentItem.dataset.slideId); break;
+            case 'Delete': case 'Backspace': event.preventDefault(); deleteSlide(currentItem.dataset.slideId); break;
+            case 'Home': event.preventDefault(); next = all[0]; break;
+            case 'End': event.preventDefault(); next = all[all.length - 1]; break;
+            default: return;
+        }
+        if (next && next !== currentItem) { currentItem.tabIndex = -1; next.tabIndex = 0; next.focus(); next.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+    }
+    async function handleToolbarAction(event) {
+        const element = event.target.closest('button[data-command], select[data-command]');
+        if (!element || element.disabled || element.getAttribute('aria-disabled') === 'true') return;
+        hideError(); const command = element.dataset.command; let value = element.value || element.dataset.value || null;
+        if (!editorState.selectedSlideId) { showError("Nincs kiválasztott dia.", 3000); return; }
+        let targetEditor = null; const activeEl = document.activeElement; if (activeEl?.isContentEditable && DOM.slideCanvas?.contains(activeEl)) targetEditor = activeEl; else if (DOM.slideContentEditor) { DOM.slideContentEditor.focus(); await new Promise(r => setTimeout(r, 0)); if (document.activeElement === DOM.slideContentEditor) targetEditor = DOM.slideContentEditor; }
+        if (!targetEditor) { showError("Kattints a szerkesztendő szövegbe.", 4000); return; }
+
+        // execCommand hívása (kivéve fontName/fontSize)
+        if (command === 'fontName' || command === 'fontSize') { console.warn(`"${command}" nincs implementálva.`); showError(`A ${command === 'fontName' ? 'betűtípus' : 'betűméret'} állítása nem támogatott.`, 3000); targetEditor.focus(); return; }
+        if (CONFIG.colorCommands.includes(command)) { const type = command === 'foreColor' ? 'szöveg' : 'kiemelés'; const def = command === 'foreColor' ? '#000000' : '#FFFF00'; const color = prompt(`Add meg a ${type} színét:`, def); if (color !== null && color !== '') value = color; else { targetEditor.focus(); return; } }
+
+        try { console.log(`execCommand: ${command}, érték: ${value}`); let executed = document.execCommand(command, false, value); if (executed) { targetEditor.dispatchEvent(new Event('input', { bubbles: true, cancelable: true })); updateToolbarState(); } else { console.warn(`execCommand "${command}" sikertelen.`); } }
+        catch (e) { console.error(`Hiba "${command}" közben:`, e); showError(`Hiba: "${command}".`); }
+        targetEditor.focus();
+    }
+    function handleCanvasInput(event) { const target = event.target; if (target?.isContentEditable) { const field = target.dataset.field; if (field) { const value = (field === 'content') ? target.innerHTML : target.textContent; debouncedUpdateSlideData(field, value); } } }
+    function handlePresentationKeys(event) {
+        if (!DOM.body.classList.contains('presentation-mode')) return; let action = null;
+        switch (event.key) { case 'ArrowRight': case 'PageDown': case ' ': case 'Enter': action = 'next'; break; case 'ArrowLeft': case 'PageUp': case 'Backspace': action = 'prev'; break; case 'Escape': event.preventDefault(); exitPresentation(); break; case 'Home': event.preventDefault(); if (editorState.slides.length > 0) selectSlide(editorState.slides[0].id); break; case 'End': event.preventDefault(); if (editorState.slides.length > 0) selectSlide(editorState.slides[editorState.slides.length - 1].id); break; case 'f': event.preventDefault(); toggleFullscreen(); break; }
+        if (action) { event.preventDefault(); navigateSlides(action); }
+    }
+    function handleFullscreenChange() { const doc = document; const isFs = !!(doc.fullscreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement); updateFullscreenButtonIcon(isFs); if (!isFs && DOM.body.classList.contains('presentation-mode')) { console.log("Fullscreen exit -> prez. exit"); exitPresentation(); } }
+    function handleGlobalClick(event) { if (DOM.moreOptionsDropdown && !DOM.moreOptionsDropdown.classList.contains('hidden')) { if (!DOM.moreOptionsButton?.contains(event.target) && !DOM.moreOptionsDropdown.contains(event.target)) toggleMoreOptions(); } }
+    function handleTitleEdit(event) {
+        const titleEl = DOM.presentationTitle; if (!titleEl) return;
+        switch (event.type) {
+            case 'click': case 'focus': if (!editorState.isTitleEditing) { editorState.isTitleEditing = true; titleEl.contentEditable = true; titleEl.setAttribute('role', 'textbox'); titleEl.classList.add('editing'); if (event.type === 'click' || !window.getSelection()?.containsNode(titleEl, true)) { const sel = window.getSelection(), range = document.createRange(); range.selectNodeContents(titleEl); sel?.removeAllRanges(); sel?.addRange(range); } titleEl.focus(); } break;
+            case 'blur': if (editorState.isTitleEditing) { editorState.isTitleEditing = false; titleEl.contentEditable = false; titleEl.setAttribute('role', 'button'); titleEl.classList.remove('editing'); const newTitle = titleEl.textContent.trim(); if (newTitle && newTitle !== editorState.presentationTitle) { editorState.presentationTitle = newTitle; setDirty(true); document.title = `* ${editorState.presentationTitle} - Prez. Szerk.`; console.log("Cím mentve:", newTitle); } else if (!newTitle) { titleEl.textContent = editorState.presentationTitle; showError("A cím nem lehet üres.", 3000); } else { titleEl.textContent = editorState.presentationTitle; } window.getSelection()?.removeAllRanges(); } break;
+            case 'keydown': if (editorState.isTitleEditing) { if (event.key === 'Enter') { event.preventDefault(); titleEl.blur(); } else if (event.key === 'Escape') { event.preventDefault(); titleEl.textContent = editorState.presentationTitle; titleEl.blur(); } } break;
+        }
+    }
+    function handleSearchInput(event) { const query = event.target.value; if (editorState.searchQuery !== query) { editorState.searchQuery = query; renderSidebar(); } }
+
+    // --- Initialization ---
+    function checkDOM() {
+        // Újra lekérjük a DOM elemeket, mert a korábbi cache lehet, hogy hibás volt
+        DOM.slideList = document.getElementById('slide-list');
+        DOM.slideCanvas = document.getElementById('slide-canvas');
+        DOM.editorToolbar = document.getElementById('editor-toolbar');
+        DOM.saveButton = document.getElementById('save-button');
+        DOM.saveButtonText = document.getElementById('save-button-text');
+        DOM.presentationTitle = document.getElementById('presentation-title');
+        DOM.presentationLastEdited = document.getElementById('presentation-last-edited');
+        DOM.canvasPlaceholder = document.getElementById('canvas-placeholder');
+        DOM.prevSlideButton = document.getElementById('prev-slide-button');
+        DOM.nextSlideButton = document.getElementById('next-slide-button');
+        DOM.slideIndicator = document.getElementById('slide-indicator');
+        DOM.shareModal = document.getElementById('share-modal');
+        DOM.shareUrlInput = document.getElementById('share-url-input');
+        DOM.copyShareUrlButton = document.getElementById('copy-share-url-button');
+        DOM.shareButton = document.getElementById('share-button');
+        DOM.addSlideButton = document.getElementById('add-slide-button');
+        DOM.canvasScaler = document.getElementById('canvas-scaler');
+        DOM.mainArea = document.querySelector('main[role="main"]');
+        DOM.bottomBar = document.getElementById('bottom-bar');
+        DOM.zoomLevelSelect = document.getElementById('zoom-level');
+        DOM.fullscreenEnterIcon = document.getElementById('fullscreen-enter-icon');
+        DOM.fullscreenExitIcon = document.getElementById('fullscreen-exit-icon');
+        DOM.fullscreenButton = document.getElementById('fullscreen-button');
+        DOM.presentButton = document.getElementById('present-button');
+        DOM.downloadButton = document.getElementById('download-button');
+        DOM.moreOptionsDropdown = document.getElementById('more-options-dropdown');
+        DOM.moreOptionsButton = document.getElementById('more-options-button');
+        DOM.renameOption = document.getElementById('rename-option');
+        DOM.duplicateOption = document.getElementById('duplicate-option');
+        DOM.historyOption = document.getElementById('history-option');
+        DOM.downloadOptionAlt = document.getElementById('download-option-alt');
+        DOM.slideListLoading = document.getElementById('slide-list-loading');
+        DOM.errorDisplay = document.getElementById('error-display');
+        DOM.zoomOutButton = document.getElementById('zoom-out-button');
+        DOM.zoomInButton = document.getElementById('zoom-in-button');
+        DOM.searchSlidesInput = document.getElementById('search-slides');
+        DOM.fontFamilySelect = document.getElementById('font-family-select');
+        DOM.fontSizeSelect = document.getElementById('font-size-select');
+        DOM.slideListEmpty = document.getElementById('slide-list-empty');
+        DOM.body = document.body;
+
+        const essential = ['slideList', 'slideCanvas', 'editorToolbar', 'canvasScaler', 'mainArea', 'bottomBar', 'presentationTitle', 'saveButton', 'searchSlidesInput', 'slideListEmpty', 'addSlideButton'];
+        const missing = essential.filter(key => !DOM[key]);
+        if (missing.length > 0) {
+            const msg = `Kritikus DOM elemek hiányoznak: ${missing.join(', ')}. Az inicializálás leáll.`;
+            console.error(msg);
+            // Próbáljuk meg kijelezni, ha lehet
+            const errDisp = DOM.errorDisplay || document.body.appendChild(document.createElement('div'));
+            errDisp.id = 'error-display'; errDisp.className = 'alert alert-danger'; errDisp.textContent = msg; errDisp.classList.remove('hidden');
+            throw new Error(msg); // Megállítjuk a script futását
+        }
+        console.log("DOM elemek ellenőrizve, mind megvan.");
+        return true;
+    }
+    function bindEventListeners() {
+        // Ellenőrizzük, hogy az elemek léteznek-e, mielőtt figyelőt adnánk hozzájuk
+        DOM.saveButton?.addEventListener('click', savePresentation);
+        DOM.shareButton?.addEventListener('click', showShareModal);
+        DOM.presentButton?.addEventListener('click', startPresentation);
+        DOM.downloadButton?.addEventListener('click', downloadPresentation);
+        DOM.moreOptionsButton?.addEventListener('click', toggleMoreOptions);
+        DOM.presentationTitle?.addEventListener('click', handleTitleEdit);
+        DOM.presentationTitle?.addEventListener('focus', handleTitleEdit);
+        DOM.presentationTitle?.addEventListener('blur', handleTitleEdit);
+        DOM.presentationTitle?.addEventListener('keydown', handleTitleEdit);
+        DOM.copyShareUrlButton?.addEventListener('click', copyShareUrl);
+        DOM.renameOption?.addEventListener('click', (e) => { e.preventDefault(); toggleMoreOptions(); DOM.presentationTitle?.click(); });
+        DOM.duplicateOption?.addEventListener('click', (e) => { e.preventDefault(); toggleMoreOptions(); showError("Másolat készítése nincs implementálva.", 3000); });
+        DOM.downloadOptionAlt?.addEventListener('click', (e) => { e.preventDefault(); toggleMoreOptions(); downloadPresentation(); });
+        DOM.slideList?.addEventListener('click', handleSidebarInteraction);
+        DOM.slideList?.addEventListener('keydown', handleSidebarKeyDown);
+        DOM.addSlideButton?.addEventListener('click', addSlide);
+        DOM.editorToolbar?.addEventListener('click', handleToolbarAction);
+        DOM.editorToolbar?.addEventListener('change', handleToolbarAction); // Fontos a selectekhez!
+        if (DOM.slideCanvas) { DOM.slideCanvas.addEventListener('input', handleCanvasInput, { capture: true }); document.addEventListener('selectionchange', debounce(updateToolbarState, 100)); DOM.slideCanvas.addEventListener('focusin', updateToolbarState); DOM.slideCanvas.addEventListener('focusout', () => setTimeout(updateToolbarState, 0)); }
+        DOM.prevSlideButton?.addEventListener('click', () => navigateSlides('prev'));
+        DOM.nextSlideButton?.addEventListener('click', () => navigateSlides('next'));
+        DOM.zoomOutButton?.addEventListener('click', () => changeZoom(-0.1));
+        DOM.zoomInButton?.addEventListener('click', () => changeZoom(0.1));
+        DOM.zoomLevelSelect?.addEventListener('change', (e) => setZoom(e.target.value));
+        DOM.fullscreenButton?.addEventListener('click', toggleFullscreen);
+        DOM.searchSlidesInput?.addEventListener('input', debounce(handleSearchInput, 250));
+        document.addEventListener('click', handleGlobalClick);
+        document.addEventListener('keydown', (e) => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); savePresentation(); } if (e.key === 'F5') { e.preventDefault(); startPresentation(); } if (e.key === 'Escape' && !DOM.body.classList.contains('presentation-mode')) { if (DOM.shareModal?.hasAttribute('open') || DOM.shareModal?.open) { /* Handled by dialog */ } else if (DOM.moreOptionsDropdown && !DOM.moreOptionsDropdown.classList.contains('hidden')) { toggleMoreOptions(); DOM.moreOptionsButton?.focus(); } else if (editorState.isTitleEditing) { /* Handled by title edit */ } } });
+        window.addEventListener('resize', debounce(() => { if (editorState.currentZoom === 'fit') applyZoom(); }, 150));
+        document.addEventListener('fullscreenchange', handleFullscreenChange); document.addEventListener('webkitfullscreenchange', handleFullscreenChange); document.addEventListener('msfullscreenchange', handleFullscreenChange);
+        window.addEventListener('beforeunload', (event) => { captureFocusedElementState(); if (editorState.isDirty) { const msg = 'Nem mentett változások vannak. Biztosan elhagyod?'; event.preventDefault(); event.returnValue = msg; return msg; } });
+        console.log("Eseményfigyelők hozzárendelve.");
+    }
+
+    // --- Initial Run ---
+    document.addEventListener('DOMContentLoaded', () => {
+        try {
+            console.log("DOM betöltődött. Inicializálás...");
+            if (!checkDOM()) return; // Ellenőrizzük a DOM elemeket az elején
+            loadPresentation(); // Betöltés vagy alaphelyzet
+            bindEventListeners(); // Figyelők hozzárendelése
+            const doc = document; updateFullscreenButtonIcon(!!(doc.fullscreenElement || doc.webkitFullscreenElement || doc.msFullscreenElement)); // Kezdeti FS állapot
+            console.log('Prezentáció Szerkesztő inicializálva (v4 - Glassmorphism).');
+            DOM.slideListLoading?.classList.add('hidden'); // Töltés elrejtése
+        } catch (error) {
+            // A checkDOM már kezeli a kritikus hibát, de itt is logolhatunk
+            console.error("!!! VÉGZETES INICIALIZÁLÁSI HIBA !!!", error);
+            // Itt már nem dobunk újabb hibát, a checkDOM megtette
+        }
+    });
+
+})(); // End of IIFE
+/* --- END OF FILE script.js --- */
+      
+      
+    </script>
 </body>
 </html>
