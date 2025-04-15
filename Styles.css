@@ -1,1 +1,392 @@
 
+/* --- START OF FILE styles.css --- */
+
+/* Basic CSS Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Define CSS Custom Properties (Variables) */
+:root {
+  --editor-dark: #1f2937; /* gray-800 */
+  --editor-medium: #374151; /* gray-700 */
+  --editor-light: #4b5563; /* gray-600 */
+  --editor-divider: #4b5563; /* gray-600 */
+  --editor-muted: #9ca3af; /* gray-400 */
+  --editor-main: #f3f4f6; /* gray-100 */
+  --editor-accent: #3b82f6; /* blue-500 */
+  --editor-focus: #60a5fa; /* blue-400 */
+  --editor-error: #ef4444; /* red-500 */
+  --editor-success: #22c55e; /* green-500 */
+  --editor-warning: #f59e0b; /* amber-500 */
+  --placeholder-color: var(--editor-muted);
+  --slide-bg-default: #ffffff;
+  --slide-text-default: #000000;
+}
+
+/* --- Base Styles --- */
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    overflow: hidden;
+    background-color: var(--editor-dark);
+    color: var(--editor-main);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Placeholder Styles --- */
+input::placeholder,
+textarea::placeholder {
+    color: var(--placeholder-color);
+    opacity: 0.7;
+}
+[contenteditable][placeholder]:empty::before {
+    content: attr(placeholder);
+    color: var(--placeholder-color);
+    opacity: 0.7;
+    pointer-events: none;
+    display: block;
+    cursor: text;
+}
+[contenteditable][placeholder]:empty:focus::before { content: ""; }
+#slide-canvas [contenteditable][placeholder]:empty::before {
+    --placeholder-color: #9ca3af;
+    font-style: normal;
+    opacity: 1;
+}
+
+/* --- Button & Select Base Styles --- */
+.action-button, .sidebar-button, .editor-toolbar-button, .toolbar-select {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    white-space: nowrap;
+    border-radius: 0.375rem; /* rounded-md */
+    font-size: 0.875rem; /* text-sm */
+    font-weight: 500;
+    transition: background-color 150ms ease-in-out, border-color 150ms ease-in-out, box-shadow 150ms ease-in-out, opacity 150ms ease-in-out;
+    border: 1px solid transparent;
+    cursor: pointer;
+    height: 2rem; /* h-8 */
+    padding: 0 0.5rem;
+    color: var(--editor-main);
+    background-color: transparent;
+}
+.action-button svg, .editor-toolbar-button svg {
+     width: 1.125rem; /* 18px */
+     height: 1.125rem;
+     flex-shrink: 0;
+}
+.action-button span, .editor-toolbar-button span { line-height: 1; }
+.action-button.icon-only, .editor-toolbar-button.icon-only { width: 2rem; min-width: 2rem; padding: 0; }
+
+/* Hover */
+.action-button:hover:not(:disabled),
+.sidebar-button:hover:not(:disabled),
+.editor-toolbar-button:hover:not(:disabled),
+.toolbar-select:hover:not(:disabled) {
+    background-color: var(--editor-light);
+}
+/* Focus-visible */
+.action-button:focus-visible,
+.sidebar-button:focus-visible,
+.editor-toolbar-button:focus-visible,
+.toolbar-select:focus-visible {
+    outline: 2px solid var(--editor-focus);
+    outline-offset: 1px;
+    z-index: 10;
+    border-color: var(--editor-focus);
+}
+/* Disabled */
+.action-button:disabled,
+.sidebar-button:disabled,
+.editor-toolbar-button:disabled,
+.toolbar-select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: transparent !important;
+}
+/* Primary button (Add Slide, Present) */
+#add-slide-button, #present-button {
+    background-color: #2563eb; /* blue-600 */
+    color: white;
+    border-color: #2563eb;
+    padding: 0.5rem 1rem; /* Nagyobb padding */
+}
+#add-slide-button:hover:not(:disabled), #present-button:hover:not(:disabled) {
+    background-color: #1d4ed8; /* blue-700 */
+    border-color: #1d4ed8;
+}
+#add-slide-button:focus-visible, #present-button:focus-visible { outline-color: var(--editor-light); }
+
+/* --- Toolbar Styles --- */
+#editor-toolbar {
+    padding: 0.25rem 0.5rem;
+    gap: 0.25rem;
+    flex-wrap: wrap; /* Tördelés engedélyezése */
+}
+#editor-toolbar > div[role="group"] {
+    display: flex;
+    align-items: center;
+    gap: 0.125rem; /* Kisebb rés a gombok között a csoporton belül */
+}
+.editor-toolbar-separator {
+    flex-shrink: 0;
+    background-color: var(--editor-divider);
+    width: 1px;
+    height: 1.25rem; /* Kisebb magasság */
+    margin: 0 0.375rem; /* Kisebb margó */
+    align-self: center;
+}
+/* Aktív/lenyomott toolbar gombok */
+.editor-toolbar-button[aria-pressed="true"],
+.editor-toolbar-button.active-toolbar-button {
+    background-color: var(--editor-light); /* Sötétebb aktív háttér */
+    color: white;
+}
+/* Toolbar Select elemek stílusa */
+.toolbar-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); /* gray-400 nyíl */
+    background-position: right 0.4rem center;
+    background-repeat: no-repeat;
+    background-size: 0.8em 0.8em;
+    padding-right: 1.75rem;
+    background-color: var(--editor-medium); /* gray-700 */
+    border: 1px solid var(--editor-divider);
+    text-align: left;
+    min-width: 80px;
+    height: 1.75rem; /* Alacsonyabb, mint a gombok */
+    padding-top: 0.1rem;
+    padding-bottom: 0.1rem;
+}
+.toolbar-select.w-16 {
+     min-width: 64px;
+     width: 64px;
+     text-align: center;
+     padding-left: 0.25rem;
+     padding-right: 1.5rem;
+}
+
+/* --- Sidebar Styles --- */
+/* Kereső mező */
+#search-slides {
+    padding-left: 2.25rem; /* Hely az ikonnak */
+    background-color: var(--editor-medium); /* Sötétebb kereső */
+    border-color: var(--editor-divider);
+}
+#search-slides:focus {
+    background-color: var(--editor-light);
+    border-color: var(--editor-focus);
+}
+/* Üres lista üzenet */
+#slide-list-empty {
+    /* JS kezeli a hidden osztályt */
+}
+/* Slide Item */
+.slide-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem;
+    border-radius: 0.375rem;
+    border: 2px solid transparent;
+    transition: background-color 150ms ease-in-out, border-color 150ms ease-in-out;
+    position: relative;
+    cursor: pointer;
+    outline: none;
+    background-color: var(--editor-medium); /* Alap háttér */
+}
+.slide-item:hover {
+    background-color: var(--editor-light);
+}
+.slide-item:focus-visible {
+    box-shadow: 0 0 0 2px var(--editor-focus) inset;
+    z-index: 10;
+}
+/* Kiválasztott dia */
+.slide-item[aria-selected="true"] {
+    background-color: var(--editor-accent); /* Kék háttér */
+    border-color: var(--editor-accent);
+    color: white;
+}
+.slide-item[aria-selected="true"]:hover {
+     background-color: #1d4ed8; /* Sötétebb kék hover */
+     border-color: #1d4ed8;
+}
+.slide-item[aria-selected="true"] .slide-number {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: normal;
+}
+.slide-item[aria-selected="true"] .slide-title-label {
+     font-weight: 500;
+}
+/* Dia sorszáma */
+.slide-number {
+    font-size: 0.75rem;
+    width: 1rem;
+    text-align: right;
+    color: var(--editor-muted);
+    flex-shrink: 0;
+    user-select: none;
+}
+/* Dia előnézet */
+.slide-preview {
+    width: 5rem;
+    height: 2.8125rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--editor-divider);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    text-align: center;
+    overflow: hidden;
+    padding: 0.1rem;
+    line-height: 1.1;
+    background-color: var(--slide-bg-default); /* Alap háttér (fehér) */
+    position: relative; /* Kontrasztos szöveg pozícionálásához */
+}
+.slide-preview > span { /* Kontrasztos szöveg */
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.1rem;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    /* A színét a JS állítja a getContrastColor alapján */
+}
+/* Dia címe */
+.slide-title-label {
+    font-size: 0.875rem;
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding-right: 1.75rem; /* Hely a törlés gombnak */
+    user-select: none;
+}
+/* Törlés gomb */
+.slide-item .delete-button {
+    position: absolute;
+    top: 0.2rem;
+    right: 0.2rem;
+    opacity: 0;
+    transition: opacity 150ms ease-in-out, background-color 150ms ease-in-out;
+    z-index: 5;
+    background-color: rgba(75, 85, 99, 0.7); /* gray-500 átlátszóbb */
+    backdrop-filter: blur(2px);
+    border-radius: 0.25rem;
+    padding: 0.1rem;
+    line-height: 0;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+.slide-item:hover .delete-button,
+.slide-item:focus-within .delete-button,
+.slide-item .delete-button:focus,
+.slide-item .delete-button:focus-visible {
+    opacity: 1;
+}
+.delete-button svg { color: #fca5a5; pointer-events: none; display: block; width: 14px; height: 14px; } /* red-300 */
+.delete-button:hover { background-color: rgba(239, 68, 68, 0.8); } /* red-500 hover */
+.delete-button:hover svg { color: white; }
+.delete-button:focus-visible { outline: 2px solid var(--editor-focus); outline-offset: 1px; background-color: rgba(220, 38, 38, 0.9); } /* red-600 focus */
+
+
+/* --- Canvas Area --- */
+#canvas-scaler { transition: transform 150ms ease-in-out; }
+#slide-canvas {
+    max-width: 100%;
+    background-color: var(--slide-bg-default);
+    color: var(--slide-text-default);
+    border-radius: 0.5rem; /* rounded-lg */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    padding: 2rem 2.5rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+#slide-canvas > [contenteditable] {
+    outline: none;
+    min-height: 1.5em;
+    background: transparent;
+    padding: 0.1em 0.2em;
+    border-radius: 2px;
+}
+#slide-canvas > [contenteditable]:focus-visible { box-shadow: 0 0 0 2px var(--editor-focus); }
+#slide-title-input { font-size: 2.25rem; line-height: 1.2; font-weight: 700; margin-bottom: 0.5rem; color: inherit; flex-shrink: 0; }
+#slide-subtitle-input { font-size: 1.25rem; line-height: 1.3; margin-bottom: 1rem; color: inherit; opacity: 0.8; flex-shrink: 0; }
+#slide-content-editor { margin-top: 1.5rem; font-size: 1rem; line-height: 1.5rem; flex: 1; min-height: 100px; color: inherit; overflow-y: auto; }
+#slide-content-editor p { margin-bottom: 0.75em; }
+#slide-content-editor p:last-child { margin-bottom: 0; }
+
+/* --- Presentation Mode --- */
+body.presentation-mode { background-color: #000 !important; }
+body.presentation-mode header, body.presentation-mode aside, body.presentation-mode #editor-toolbar, body.presentation-mode #bottom-bar, body.presentation-mode .slide-item .delete-button { display: none !important; }
+body.presentation-mode main { padding: 0 !important; height: 100vh !important; width: 100vw !important; position: fixed !important; top: 0; left: 0; background-color: #000 !important; display: flex !important; align-items: center !important; justify-content: center !important; overflow: hidden !important; }
+body.presentation-mode #canvas-scaler { width: 100% !important; height: 100% !important; display: flex !important; align-items: center !important; justify-content: center !important; transform: none !important; origin: center center !important; }
+body.presentation-mode #slide-canvas { box-shadow: none !important; border-radius: 0 !important; border: none !important; width: 100% !important; height: 100% !important; max-width: calc(100vh * (16 / 9)); max-height: calc(100vw * (9 / 16)); padding: 2vw !important; overflow: hidden !important; }
+body.presentation-mode [contenteditable] { contenteditable: false !important; cursor: default !important; outline: none !important; user-select: none; }
+body.presentation-mode #slide-canvas [contenteditable]:focus-visible { box-shadow: none !important; }
+
+/* --- Cím szerkesztésének jelzése --- */
+#presentation-title.editing { background-color: rgba(96, 165, 250, 0.2); box-shadow: 0 0 0 1px var(--editor-focus); cursor: text; }
+
+/* --- Alsó Sáv Zoom Select --- */
+#zoom-level { /* Mostantól a .toolbar-select stílust használja */ }
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  #editor-toolbar { justify-content: flex-start; padding: 0.25rem 0.5rem; gap: 0.125rem; }
+  .editor-toolbar-button { padding: 0 0.25rem; gap: 0.25rem; height: 1.75rem; }
+  .editor-toolbar-button.icon-only { width: 1.75rem; min-width: 1.75rem; }
+  .editor-toolbar-separator { margin: 0 0.25rem; height: 1rem; }
+  .toolbar-select { font-size: 0.75rem; height: 1.75rem; padding: 0 0.25rem 0 0.5rem; padding-right: 1.5rem; background-position: right 0.25rem center; min-width: 60px; }
+  .toolbar-select.w-16 { min-width: 50px; width: 50px; padding-left: 0.1rem; padding-right: 1.25rem; }
+
+  #slide-canvas { padding: 1rem 1.5rem; }
+  #slide-title-input { font-size: 1.5rem; line-height: 1.2; }
+  #slide-subtitle-input { font-size: 1rem; line-height: 1.3; }
+  #slide-content-editor { font-size: 0.875rem; line-height: 1.5; }
+
+  #bottom-bar { font-size: 0.75rem; padding: 0.1rem 0.5rem; }
+  #slide-indicator { min-width: 50px; }
+  #bottom-bar .action-button { height: 1.75rem; padding: 0.1rem 0.25rem; }
+  #bottom-bar .action-button.icon-only { width: 1.75rem; }
+  #bottom-bar .toolbar-select { height: 1.75rem; min-width: 60px; }
+}
+
+/* --- Print Styles (Marad változatlan) --- */
+@media print {
+  @page { size: A4 landscape; margin: 1cm; }
+  body { background-color: white !important; color: black !important; overflow: visible !important; height: auto !important; width: auto !important; position: static !important; display: block !important; }
+  header, aside, #editor-toolbar, #bottom-bar, .slide-item .delete-button, #add-slide-button, #error-display, #share-modal, #more-options-dropdown, #slide-list-loading, #canvas-placeholder, #search-slides { display: none !important; }
+  main { padding: 0 !important; height: auto !important; width: 100% !important; position: static !important; display: block !important; overflow: visible !important; background-color: transparent !important; }
+  #slide-list { display: block !important; overflow: visible !important; height: auto !important; padding: 0 !important; margin: 0 !important; border: none !important; }
+  .slide-item { display: none !important; }
+  #canvas-scaler { /* Nyomtatáskor minden dia külön "canvas-scaler"-ként jelenik meg */ display: block !important; width: 100% !important; height: auto !important; page-break-inside: avoid !important; page-break-after: always !important; margin-bottom: 1cm; transform: none !important; box-shadow: none !important; border: 1px solid #ccc !important; border-radius: 0 !important; overflow: hidden !important; background-color: white !important; color: black !important; padding: 1cm !important; aspect-ratio: 16 / 9; }
+  #canvas-scaler, #canvas-scaler * { color: black !important; background-color: transparent !important; text-shadow: none !important; box-shadow: none !important; border-color: black !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  [contenteditable][placeholder]:empty::before { content: "" !important; }
+}
+
+/* --- END OF FILE styles.css --- */
