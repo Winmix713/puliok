@@ -5,102 +5,259 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modern Prezentáció Szerkesztő</title>
     <link rel="stylesheet" href="styles.css">
-    <!-- Tailwind CSS CDN (Optimized for Production) -->
+    <!-- Tailwind CSS CDN (Fejlesztéshez. Élesben optimalizáld!) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Skeleton Loader Animation */
-        .skeleton-slide { 
-            height: 72px; 
-            background-color: var(--editor-light, #2a2a2a); 
-            border-radius: 4px; 
-            animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; 
-        }
-        @keyframes pulse { 
-            0%, 100% { opacity: 1; } 
-            50% { opacity: .5; } 
-        }
+        /* Dialógus és Skeleton Loader stílusok (styles.css-be is tehetők) */
+        dialog::backdrop { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(2px); }
+        .skeleton-slide { height: 72px; background-color: var(--editor-light, #2a2a2a); border-radius: 4px; animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
     </style>
 </head>
 <body class="bg-editor-dark text-editor-main h-screen flex flex-col overflow-hidden">
 
-    <!-- Header -->
+    <!-- Header / Felső Eszköztár -->
     <header role="banner" class="flex items-center justify-between px-3 py-1.5 border-b border-editor-divider bg-editor-dark text-sm flex-shrink-0 relative">
-        <!-- Left Section -->
+        <!-- Bal Szekció -->
         <div class="flex items-center space-x-3">
-            <button type="button" class="action-button icon-only" title="Menü (Nincs imp.)" aria-label="Főmenü megnyitása">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="4" x2="20" y1="12" y2="12"></line>
-                    <line x1="4" x2="20" y1="6" y2="6"></line>
-                    <line x1="4" x2="20" y1="18" y2="18"></line>
-                </svg>
-            </button>
-            <div class="flex flex-col">
-                <h1 id="presentation-title" class="text-sm font-medium cursor-pointer hover:bg-editor-light px-1 -mx-1 rounded outline-none focus-visible:ring-1 focus-visible:ring-editor-focus" tabindex="0" title="Kattints a szerkesztéshez" aria-label="Prezentáció címe, kattints a szerkesztéshez" role="button">
+             <button type="button" class="action-button icon-only" title="Menü (Nincs imp.)" aria-label="Főmenü megnyitása">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg>
+             </button>
+             <div class="flex flex-col">
+                 <h1 id="presentation-title" class="text-sm font-medium cursor-pointer hover:bg-editor-light px-1 -mx-1 rounded outline-none focus-visible:ring-1 focus-visible:ring-editor-focus" tabindex="0" title="Kattints a szerkesztéshez" aria-label="Prezentáció címe, kattints a szerkesztéshez" role="button">
                     Névtelen Prezentáció
                 </h1>
                 <span id="presentation-last-edited" class="text-xs text-editor-muted" aria-live="polite">Betöltés...</span>
             </div>
         </div>
-        <!-- Right Section -->
+        <!-- Középső Szekció: ÜRES -->
+        <div></div>
+        <!-- Jobb Szekció -->
         <div role="toolbar" aria-label="Prezentáció műveletek" class="flex items-center space-x-2">
             <button type="button" id="save-button" class="action-button" title="Mentés (Ctrl+S)" aria-label="Prezentáció mentése">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
-                    <polyline points="7 3 7 8 15 8"></polyline>
-                </svg>
-                <span id="save-button-text">Mentés</span>
+                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                 <span id="save-button-text">Mentés</span>
             </button>
             <button type="button" id="share-button" class="action-button" title="Megosztás" aria-label="Prezentáció megosztása" aria-haspopup="dialog" aria-controls="share-modal">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="18" cy="5" r="3"></circle>
-                    <circle cx="6" cy="12" r="3"></circle>
-                    <circle cx="18" cy="19" r="3"></circle>
-                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                </svg>
+                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
                 Megosztás
             </button>
             <button type="button" id="present-button" class="action-button text-white bg-blue-600 hover:bg-blue-700 border-blue-600 hover:border-blue-700" title="Bemutatás (F5)" aria-label="Prezentáció indítása">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true">
-                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                </svg>
+                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                 Bemutatás
             </button>
             <div class="editor-toolbar-separator mx-1" role="separator" aria-orientation="vertical"></div>
             <button type="button" id="download-button" class="action-button icon-only" title="Letöltés (JSON)" aria-label="Prezentáció letöltése JSON formátumban">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             </button>
             <button type="button" id="more-options-button" class="action-button icon-only" title="További opciók" aria-label="További prezentációs opciók" aria-haspopup="true" aria-expanded="false" aria-controls="more-options-dropdown">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <circle cx="12" cy="12" r="1"></circle>
-                    <circle cx="12" cy="5" r="1"></circle>
-                    <circle cx="12" cy="19" r="1"></circle>
-                </svg>
+                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
             </button>
+
+            <!-- Megosztás Modális Ablak -->
+            <dialog id="share-modal" class="bg-editor-light p-6 rounded-lg shadow-xl text-editor-main max-w-sm w-full border border-editor-divider" aria-labelledby="share-modal-title" aria-modal="true">
+                <h3 id="share-modal-title" class="text-lg font-medium mb-4">Prezentáció Megosztása</h3>
+                <p class="text-sm text-editor-muted mb-2">Másold ki ezt a linket (ez csak egy példa):</p>
+                <input id="share-url-input" type="text" readonly class="w-full bg-editor-dark p-2 rounded border border-editor-divider text-sm mb-4 focus:outline-none focus:ring-1 focus:ring-editor-focus" aria-label="Megosztási link" value="Generálás...">
+                <div class="flex justify-end space-x-2">
+                    <button type="button" id="copy-share-url-button" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm action-button">Másolás</button>
+                    <form method="dialog" class="inline"><button type="submit" class="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm action-button">Bezárás</button></form>
+                </div>
+            </dialog>
+
+            <!-- További Opciók Legördülő Menü -->
+            <div id="more-options-dropdown" class="hidden absolute top-full right-0 mt-2 w-48 bg-editor-light rounded-md shadow-lg py-1 z-40 border border-editor-divider" role="menu" aria-orientation="vertical" aria-labelledby="more-options-button">
+                <a href="#" id="rename-option" class="block px-4 py-2 text-sm text-editor-main hover:bg-editor-dark" role="menuitem">Átnevezés</a>
+                <a href="#" id="duplicate-option" class="block px-4 py-2 text-sm text-editor-main hover:bg-editor-dark" role="menuitem">Másolat készítése</a>
+                <a href="#" id="history-option" class="block px-4 py-2 text-sm text-editor-muted hover:bg-editor-dark cursor-not-allowed" role="menuitem" aria-disabled="true">Verzióelőzmények (Nincs imp.)</a>
+                <a href="#" id="download-option-alt" class="block px-4 py-2 text-sm text-editor-main hover:bg-editor-dark md:hidden" role="menuitem">Letöltés (JSON)</a>
+            </div>
         </div>
     </header>
 
-    <!-- Main Content -->
+    <!-- Szerkesztő Formázási Eszköztár (Átalakítva csoportokkal) -->
+    <div id="editor-toolbar" role="toolbar" aria-label="Szerkesztő formázási eszközök" class="px-2 py-1 border-b border-editor-divider bg-editor-dark flex items-center flex-wrap gap-x-1 text-editor-main flex-shrink-0 overflow-x-auto">
+        <!-- Undo/Redo Csoport -->
+        <div class="flex items-center space-x-0.5" role="group" aria-label="Visszavonás/Újra">
+             <button type="button" title="Visszavonás (Ctrl+Z)" aria-label="Visszavonás" data-command="undo" class="editor-toolbar-button icon-only">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"></path><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"></path></svg>
+             </button>
+             <button type="button" title="Újra (Ctrl+Y)" aria-label="Újra" data-command="redo" class="editor-toolbar-button icon-only">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3l-3 2.7"></path></svg>
+             </button>
+        </div>
+        <div class="editor-toolbar-separator" role="separator" aria-orientation="vertical"></div>
+
+        <!-- Beszúrás Csoport (Funkcionalitás Nincs Imp.) -->
+        <div class="flex items-center space-x-0.5" role="group" aria-label="Beszúrás">
+             <button type="button" title="Szöveg beszúrása (Nincs imp.)" aria-label="Szövegdoboz beszúrása" data-feature="insert-text" class="editor-toolbar-button icon-only">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 6.1H7"></path><path d="M21 12.1H7"></path><path d="M15 18.1H7"></path><path d="M3 4.1v16"></path></svg>
+             </button>
+             <button type="button" title="Kép beszúrása (Nincs imp.)" aria-label="Kép beszúrása" data-feature="insert-image" class="editor-toolbar-button icon-only">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>
+             </button>
+             <button type="button" title="Elrendezés (Nincs imp.)" aria-label="Dia elrendezésének módosítása" data-feature="layout" class="editor-toolbar-button icon-only">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M3 9h18"></path><path d="M9 21V9"></path></svg>
+             </button>
+        </div>
+        <div class="editor-toolbar-separator" role="separator" aria-orientation="vertical"></div>
+
+         <!-- Betűtípus és Méret Csoport (Korlátozott funkcionalitás) -->
+         <div class="flex items-center space-x-1" role="group" aria-label="Betűtípus és Méret">
+             <label for="font-family-select" class="sr-only">Betűtípus</label>
+             <select id="font-family-select" title="Betűtípus (Korlátozott)" aria-label="Betűtípus választása (Korlátozott)" data-command="fontName" class="toolbar-select">
+                 <option style="font-family: Arial, sans-serif;">Arial</option>
+                 <option style="font-family: Verdana, sans-serif;">Verdana</option>
+                 <option style="font-family: 'Times New Roman', serif;">Times New Roman</option>
+                 <option style="font-family: Georgia, serif;">Georgia</option>
+                 <option style="font-family: 'Courier New', monospace;">Courier New</option>
+                 <option style="font-family: 'Comic Sans MS', cursive;">Comic Sans MS</option>
+             </select>
+             <label for="font-size-select" class="sr-only">Betűméret</label>
+             <select id="font-size-select" title="Betűméret (Korlátozott)" aria-label="Betűméret választása (Korlátozott)" data-command="fontSize" class="toolbar-select w-16">
+                 <!-- Az értékek 1-7 között az execCommand régi méreteihez igazodnak -->
+                 <option value="1">8</option>
+                 <option value="2">10</option>
+                 <option value="3" selected>12</option> <!-- Alapértelmezett -->
+                 <option value="4">14</option>
+                 <option value="5">18</option>
+                 <option value="6">24</option>
+                 <option value="7">36</option>
+             </select>
+        </div>
+        <div class="editor-toolbar-separator" role="separator" aria-orientation="vertical"></div>
+
+        <!-- Szövegformázás Csoport -->
+        <div class="flex items-center space-x-0.5" role="group" aria-label="Szövegformázás">
+            <button type="button" title="Félkövér (Ctrl+B)" aria-label="Félkövér" data-command="bold" aria-pressed="false" class="editor-toolbar-button icon-only">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 12a4 4 0 0 0 0-8H6v8"></path><path d="M15 20a4 4 0 0 0 0-8H6v8Z"></path></svg>
+            </button>
+            <button type="button" title="Dőlt (Ctrl+I)" aria-label="Dőlt" data-command="italic" aria-pressed="false" class="editor-toolbar-button icon-only">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" x2="10" y1="4" y2="4"></line><line x1="14" x2="5" y1="20" y2="20"></line><line x1="15" x2="9" y1="4" y2="20"></line></svg>
+            </button>
+            <button type="button" title="Aláhúzott (Ctrl+U)" aria-label="Aláhúzott" data-command="underline" aria-pressed="false" class="editor-toolbar-button icon-only">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v6a6 6 0 0 0 12 0V4"></path><line x1="4" x2="20" y1="20" y2="20"></line></svg>
+            </button>
+             <button type="button" title="Szövegszín (Korlátozott)" aria-label="Szövegszín" data-command="foreColor" class="editor-toolbar-button icon-only">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19.26 4.42 5.02C5.3 3.63 6.9 3 8.5 3h7c1.6 0 3.2.63 4.08 2.02L12 19.26Z"></path><path d="m6 15 6 6 6-6"></path></svg>
+             </button>
+             <button type="button" title="Háttérszín (Korlátozott)" aria-label="Kiemelő szín" data-command="backColor" class="editor-toolbar-button icon-only">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5 4 4"></path><path d="M13 7 8.7 2.7a1 1 0 0 0-1.4 0L2.7 7.3a1 1 0 0 0 0 1.4L7 13l6-6Z"></path><path d="m8.5 8.5 7 7"></path><path d="M11 11 5.5 16.5a1 1 0 0 0 0 1.4L10.1 22a1 1 0 0 0 1.4 0l6.1-6.1a1 1 0 0 0 0-1.4L11 11Z"></path></svg>
+             </button>
+         </div>
+        <div class="editor-toolbar-separator" role="separator" aria-orientation="vertical"></div>
+
+        <!-- Igazítás Csoport -->
+        <div class="flex items-center space-x-0.5" role="group" aria-label="Igazítás">
+            <button type="button" title="Balra igazítás" aria-label="Balra igazítás" data-command="justifyLeft" aria-pressed="false" class="editor-toolbar-button icon-only">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="3" y1="6" y2="6"></line><line x1="15" x2="3" y1="12" y2="12"></line><line x1="17" x2="3" y1="18" y2="18"></line></svg>
+            </button>
+            <button type="button" title="Középre igazítás" aria-label="Középre igazítás" data-command="justifyCenter" aria-pressed="false" class="editor-toolbar-button icon-only">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="3" y1="6" y2="6"></line><line x1="17" x2="7" y1="12" y2="12"></line><line x1="19" x2="5" y1="18" y2="18"></line></svg>
+            </button>
+            <button type="button" title="Jobbra igazítás" aria-label="Jobbra igazítás" data-command="justifyRight" aria-pressed="false" class="editor-toolbar-button icon-only">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" x2="3" y1="6" y2="6"></line><line x1="21" x2="9" y1="12" y2="12"></line><line x1="21" x2="7" y1="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <div class="editor-toolbar-separator" role="separator" aria-orientation="vertical"></div>
+
+        <!-- Lista Csoport -->
+        <div class="flex items-center space-x-0.5" role="group" aria-label="Listák">
+            <button type="button" title="Felsorolás" aria-label="Felsorolás" data-command="insertUnorderedList" aria-pressed="false" class="editor-toolbar-button icon-only">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" x2="21" y1="6" y2="6"></line><line x1="8" x2="21" y1="12" y2="12"></line><line x1="8" x2="21" y1="18" y2="18"></line><line x1="3" x2="3.01" y1="6" y2="6"></line><line x1="3" x2="3.01" y1="12" y2="12"></line><line x1="3" x2="3.01" y1="18" y2="18"></line></svg>
+            </button>
+            <button type="button" title="Számozott lista" aria-label="Számozott lista" data-command="insertOrderedList" aria-pressed="false" class="editor-toolbar-button icon-only">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" x2="21" y1="6" y2="6"></line><line x1="10" x2="21" y1="12" y2="12"></line><line x1="10" x2="21" y1="18" y2="18"></line><path d="M4 6h1v4"></path><path d="M4 12h1.5l-1.5 2h2"></path><path d="M5 18h1.5l-1.5 2h2"></path></svg>
+            </button>
+        </div>
+         <!-- Egyéb Csoport -->
+         <div class="editor-toolbar-separator" role="separator" aria-orientation="vertical"></div>
+         <div class="flex items-center space-x-0.5" role="group" aria-label="Egyéb">
+             <button type="button" title="Behúzás csökkentése" aria-label="Behúzás csökkentése" data-command="outdent" class="editor-toolbar-button icon-only">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 8 3 12 7 16"></polyline><line x1="21" x2="11" y1="12" y2="12"></line><line x1="21" x2="11" y1="6" y2="6"></line><line x1="21" x2="11" y1="18" y2="18"></line></svg>
+             </button>
+             <button type="button" title="Behúzás növelése" aria-label="Behúzás növelése" data-command="indent" class="editor-toolbar-button icon-only">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 8 21 12 17 16"></polyline><line x1="3" x2="11" y1="12" y2="12"></line><line x1="3" x2="11" y1="6" y2="6"></line><line x1="3" x2="11" y1="18" y2="18"></line></svg>
+             </button>
+              <button type="button" title="Formázás törlése" aria-label="Formázás törlése" data-command="removeFormat" class="editor-toolbar-button icon-only">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Z"></path><path d="M13 2v7h7"></path><path d="M16.5 14 19 11.5 21.5 14"></path><path d="M19 11.5v8"></path></svg>
+             </button>
+         </div>
+    </div>
+
+    <!-- Fő Tartalmi Terület -->
     <div class="flex flex-1 overflow-hidden">
-        <!-- Sidebar -->
+        <!-- Oldalsáv -->
         <aside class="w-60 bg-editor-dark border-r border-editor-divider flex flex-col pt-3 flex-shrink-0" aria-labelledby="sidebar-heading">
             <div class="px-3 mb-3 flex flex-col space-y-3">
                 <h2 id="sidebar-heading" class="sr-only">Diák panel</h2>
+                <!-- Kereső -->
                 <div class="relative" role="search">
                     <label for="search-slides" class="sr-only">Diák keresése</label>
-                    <input type="search" id="search-slides" name="search-slides" placeholder="Diák keresése..." class="w-full pl-9 pr-3 py-1.5 bg-editor-light text-editor-main rounded-md placeholder-editor-muted">
+                    <div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-editor-muted"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </div>
+                    <input type="search" id="search-slides" name="search-slides" placeholder="Diák keresése..." class="w-full pl-9 pr-3 py-1.5 bg-editor-light text-editor-main rounded-md placeholder-editor-muted focus:outline-none focus:ring-1 focus:ring-editor-focus text-sm border border-transparent focus:border-editor-focus">
                 </div>
+                <!-- Új Dia Gomb -->
+                <button type="button" id="add-slide-button" class="w-full sidebar-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    Új Dia
+                </button>
+            </div>
+
+            <!-- Dia Lista -->
+            <div id="slide-list" class="flex-1 overflow-y-auto px-2 space-y-1 pb-2" role="listbox" aria-label="Dia lista" aria-orientation="vertical">
+                <div id="slide-list-loading" class="p-4 space-y-2" aria-live="polite" aria-busy="true">
+                    <div class="skeleton-slide"></div>
+                    <div class="skeleton-slide opacity-75"></div>
+                    <div class="skeleton-slide opacity-50"></div>
+                    <span class="sr-only">Diák betöltése...</span>
+                </div>
+                 <div id="slide-list-empty" class="hidden text-center text-editor-muted text-sm p-4">Nincsenek diák vagy a keresésnek nincs eredménye.</div>
             </div>
         </aside>
 
-        <!-- Canvas -->
-        <main role="main" aria-labelledby="canvas-heading" class="flex-1 bg-editor-medium flex flex-col items-center justify-center p-4">
-            <div id="slide-canvas" class="w-[960px] bg-slide-bg-default"></div>
+        <!-- Vászon Terület -->
+        <main role="main" aria-labelledby="canvas-heading" class="flex-1 bg-editor-medium flex flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden">
+            <div id="error-display" class="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-editor-error text-white px-4 py-2 rounded shadow-md hidden max-w-md text-center" role="alert" aria-live="assertive"></div>
+            <div id="canvas-scaler" class="transition-transform duration-150 ease-in-out origin-top-left md:origin-center">
+                <div id="slide-canvas" class="w-[960px] max-w-full bg-slide-bg-default text-slide-text-default rounded-lg shadow-lg aspect-[16/9] p-8 md:p-10 relative flex flex-col overflow-hidden" style="aspect-ratio: 16 / 9;">
+                    <div id="canvas-placeholder" class="flex items-center justify-center h-full text-center">
+                         <p class="text-gray-400">Válassz ki vagy hozz létre egy diát a kezdéshez.</p>
+                    </div>
+                    <!-- Dinamikus tartalom (JS) -->
+                </div>
+            </div>
+            <!-- Alsó Sáv -->
+            <div id="bottom-bar" class="absolute bottom-0 left-0 right-0 bg-editor-dark border-t border-editor-divider px-4 py-1 flex items-center justify-between text-sm flex-shrink-0" role="toolbar" aria-label="Dia navigáció és nézetvezérlők">
+                 <div class="flex items-center space-x-2" role="group" aria-label="Dia navigáció">
+                     <button type="button" id="prev-slide-button" class="action-button icon-only" title="Előző dia (Balra nyíl)" aria-label="Előző dia" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                     </button>
+                     <span id="slide-indicator" class="text-xs text-editor-muted w-16 text-center tabular-nums" aria-live="polite" aria-atomic="true">Dia - / -</span>
+                     <button type="button" id="next-slide-button" class="action-button icon-only" title="Következő dia (Jobbra nyíl)" aria-label="Következő dia" disabled>
+                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                     </button>
+                 </div>
+                 <div class="flex items-center space-x-2" role="group" aria-label="Nagyítás és nézet opciók">
+                     <button type="button" id="zoom-out-button" class="action-button icon-only" title="Kicsinyítés (-)" aria-label="Kicsinyítés">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                     </button>
+                     <label for="zoom-level" class="sr-only">Nagyítási szint</label>
+                     <select id="zoom-level" name="zoom-level" class="toolbar-select w-20">
+                         <option value="0.5">50%</option><option value="0.75">75%</option><option value="1.0" selected>100%</option><option value="1.5">150%</option><option value="2.0">200%</option><option value="fit">Illesztés</option>
+                     </select>
+                      <button type="button" id="zoom-in-button" class="action-button icon-only" title="Nagyítás (+)" aria-label="Nagyítás">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
+                     </button>
+                      <div class="editor-toolbar-separator mx-1" role="separator" aria-orientation="vertical"></div>
+                     <button type="button" id="fullscreen-button" class="action-button icon-only" title="Teljes képernyő (f)" aria-label="Teljes képernyős mód bekapcsolása">
+                         <svg id="fullscreen-enter-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+                         <svg id="fullscreen-exit-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg>
+                     </button>
+                 </div>
+            </div>
         </main>
     </div>
 
